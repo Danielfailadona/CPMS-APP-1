@@ -5,6 +5,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const taskCrud = new CrudHelper('tasks');
     const complaintCrud = new CrudHelper('complaints');
     
+    console.log('CRUD helpers initialized');
+    console.log('CSRF Token:', document.querySelector('input[name="_token"]')?.value);
+    
     const form = document.getElementById('userForm');
     const createBtn = document.getElementById('createBtn');
     const updateBtn = document.getElementById('updateBtn');
@@ -47,22 +50,22 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 // For new users, password is required
                 if (!password) {
-                    alert('Password is required for new users');
+                    showError('Password is required for new users');
                     return;
                 }
                 result = await userCrud.create(data);
             }
 
             if (result.success) {
-                alert(result.message);
+                showSuccess(result.message);
                 resetForm();
                 loadUsers();
             } else {
-                alert('Error: ' + (result.message || 'Unknown error'));
+                showError('Error: ' + (result.message || 'Unknown error'));
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Error processing request');
+            showError('Error processing request');
         }
     });
 
@@ -82,40 +85,48 @@ document.addEventListener('DOMContentLoaded', function() {
     clearBtn.addEventListener('click', resetForm);
 
     async function loadUsers() {
-        const users = await userCrud.readAll();
-        
-        if (users.length === 0) {
-            usersList.innerHTML = '<p class="no-users">No users found in the system.</p>';
+        console.log('Loading users...');
+        try {
+            const users = await userCrud.readAll();
+            console.log('Users loaded:', users);
+            
+            if (users.length === 0) {
+                usersList.innerHTML = '<p class="no-users">No users found in the system.</p>';
+                return;
+            }
+            
+            const usersHTML = users.map(user => `
+                <div class="user-item" data-id="${user.id}">
+                    <div class="user-info">
+                        <strong>${user.name}</strong> 
+                        <span class="user-email">(${user.email})</span>
+                        <span class="user-type ${user.user_type}">${user.user_type.toUpperCase()}</span>
+                        <span class="user-status ${user.is_authorized ? 'authorized' : 'pending'}">
+                            ${user.is_authorized ? '✓ Authorized' : '⏳ Pending'}
+                        </span>
+                        <span class="user-active ${user.is_active ? 'active' : 'inactive'}">
+                            ${user.is_active ? '🟢 Active' : '🔴 Inactive'}
+                        </span>
+                    </div>
+                    <div class="user-actions">
+                        <button class="edit-btn" onclick="editUser(${user.id})">Edit</button>
+                        <button class="toggle-auth-btn ${user.is_authorized ? 'unauth' : 'auth'}" onclick="toggleAuthorization(${user.id}, ${user.is_authorized})">
+                            ${user.is_authorized ? 'Unauthorize' : 'Authorize'}
+                        </button>
+                        <button class="toggle-active-btn ${user.is_active ? 'deactivate' : 'activate'}" onclick="toggleActive(${user.id}, ${user.is_active})">
+                            ${user.is_active ? 'Deactivate' : 'Activate'}
+                        </button>
+                        <button class="delete-btn" onclick="deleteUser(${user.id})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            usersList.innerHTML = usersHTML;
+        } catch (error) {
+            console.error('Error loading users:', error);
+            usersList.innerHTML = '<p class="no-users">Error loading users. Check console for details.</p>';
             return;
         }
-        
-        const usersHTML = users.map(user => `
-            <div class="user-item" data-id="${user.id}">
-                <div class="user-info">
-                    <strong>${user.name}</strong> 
-                    <span class="user-email">(${user.email})</span>
-                    <span class="user-type ${user.user_type}">${user.user_type.toUpperCase()}</span>
-                    <span class="user-status ${user.is_authorized ? 'authorized' : 'pending'}">
-                        ${user.is_authorized ? '✓ Authorized' : '⏳ Pending'}
-                    </span>
-                    <span class="user-active ${user.is_active ? 'active' : 'inactive'}">
-                        ${user.is_active ? '🟢 Active' : '🔴 Inactive'}
-                    </span>
-                </div>
-                <div class="user-actions">
-                    <button class="edit-btn" onclick="editUser(${user.id})">Edit</button>
-                    <button class="toggle-auth-btn ${user.is_authorized ? 'unauth' : 'auth'}" onclick="toggleAuthorization(${user.id}, ${user.is_authorized})">
-                        ${user.is_authorized ? 'Unauthorize' : 'Authorize'}
-                    </button>
-                    <button class="toggle-active-btn ${user.is_active ? 'deactivate' : 'activate'}" onclick="toggleActive(${user.id}, ${user.is_active})">
-                        ${user.is_active ? 'Deactivate' : 'Activate'}
-                    </button>
-                    <button class="delete-btn" onclick="deleteUser(${user.id})">Delete</button>
-                </div>
-            </div>
-        `).join('');
-        
-        usersList.innerHTML = usersHTML;
     }
 
     // Edit user - load all user data into form
@@ -124,6 +135,14 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (result.success) {
             const user = result.data;
+            
+            // Hide all sections and show user form section
+            document.querySelectorAll('.section').forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById('user-form-section').style.display = 'block';
+            
+            // Populate form fields
             document.getElementById('name').value = user.name;
             document.getElementById('email').value = user.email;
             document.getElementById('user_type').value = user.user_type;
@@ -153,13 +172,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 
                 if (result.success) {
-                    alert(`User ${action}d successfully!`);
+                    showSuccess(`User ${action}d successfully!`);
                     loadUsers();
                 } else {
-                    alert('Error: ' + (result.message || 'Unknown error'));
+                    showError('Error: ' + (result.message || 'Unknown error'));
                 }
             } catch (error) {
-                alert('Error updating user authorization');
+                showError('Error updating user authorization');
             }
         }
     };
@@ -167,39 +186,39 @@ document.addEventListener('DOMContentLoaded', function() {
     // Toggle user active status
     window.toggleActive = async function(id, currentlyActive) {
         const action = currentlyActive ? 'deactivate' : 'activate';
-        if (confirm(`Are you sure you want to ${action} this user?`)) {
+        showConfirmPopup(`${action.charAt(0).toUpperCase() + action.slice(1)} User`, `Are you sure you want to ${action} this user?`, async function() {
             try {
                 const result = await userCrud.update(id, {
                     is_active: !currentlyActive
                 });
                 
                 if (result.success) {
-                    alert(`User ${action}d successfully!`);
+                    showSuccess(`User ${action}d successfully!`);
                     loadUsers();
                 } else {
-                    alert('Error: ' + (result.message || 'Unknown error'));
+                    showError('Error: ' + (result.message || 'Unknown error'));
                 }
             } catch (error) {
-                alert('Error updating user status');
+                showError('Error updating user status');
             }
-        }
+        });
     };
 
     // Delete user
     window.deleteUser = async function(id) {
-        if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+        showConfirmPopup('Delete User', 'Are you sure you want to delete this user? This action cannot be undone.', async function() {
             const result = await userCrud.delete(id);
             
             if (result.success) {
-                alert(result.message);
+                showSuccess(result.message);
                 loadUsers();
                 if (currentEditingId === id) {
                     resetForm();
                 }
             } else {
-                alert('Error: ' + (result.message || 'Unknown error'));
+                showError('Error: ' + (result.message || 'Unknown error'));
             }
-        }
+        });
     };
 
     // View user details
@@ -211,7 +230,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const status = user.is_authorized ? 'Authorized' : 'Pending Authorization';
             const active = user.is_active ? 'Active' : 'Inactive';
             
-            alert(`User Details:\n\nID: ${user.id}\nName: ${user.name}\nEmail: ${user.email}\nType: ${user.user_type}\nStatus: ${status}\nActive: ${active}\nCreated: ${new Date(user.created_at).toLocaleString()}\nNotes: ${user.authorization_notes || 'None'}`);
+            showInfo(`User Details:\n\nID: ${user.id}\nName: ${user.name}\nEmail: ${user.email}\nType: ${user.user_type}\nStatus: ${status}\nActive: ${active}\nCreated: ${new Date(user.created_at).toLocaleString()}\nNotes: ${user.authorization_notes || 'None'}`);
         }
     };
 
@@ -226,35 +245,55 @@ document.addEventListener('DOMContentLoaded', function() {
         updateBtn.style.display = 'none';
     }
 
+    // Show edit users section
+    window.showEditUsers = function() {
+        document.querySelectorAll('.section').forEach(section => {
+            section.style.display = 'none';
+        });
+        document.getElementById('users-section').style.display = 'block';
+        loadUsers();
+    };
+
+    // Show add user form
+    window.showAddUser = function() {
+        document.querySelectorAll('.section').forEach(section => {
+            section.style.display = 'none';
+        });
+        document.getElementById('user-form-section').style.display = 'block';
+        resetForm();
+    };
+
+    // Show delete users
+    window.showDeleteUsers = function() {
+        showEditUsers();
+    };
+
+    // Toggle dropdown menu
+    window.toggleDropdown = function() {
+        const dropdown = document.getElementById('userDropdown');
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+    };
+
     // Navigation function
     window.showSection = function(section) {
-        // Hide all sections
         document.getElementById('users-section').style.display = 'none';
         document.getElementById('user-form-section').style.display = 'none';
         document.getElementById('uploads-section').style.display = 'none';
         document.getElementById('tasks-section').style.display = 'none';
         document.getElementById('complaints-section').style.display = 'none';
         
-        // Remove active class from all nav buttons
-        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-        
-        // Show selected section and activate button
         if (section === 'users') {
             document.getElementById('users-section').style.display = 'block';
             document.getElementById('user-form-section').style.display = 'block';
-            event.target.classList.add('active');
             loadUsers();
         } else if (section === 'uploads') {
             document.getElementById('uploads-section').style.display = 'block';
-            event.target.classList.add('active');
             loadUploads();
         } else if (section === 'tasks') {
             document.getElementById('tasks-section').style.display = 'block';
-            event.target.classList.add('active');
             loadTasks();
         } else if (section === 'complaints') {
             document.getElementById('complaints-section').style.display = 'block';
-            event.target.classList.add('active');
             loadComplaints();
         }
     };
@@ -357,7 +396,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const result = await uploadCrud.readOne(id);
         if (result.success) {
             const upload = result.data;
-            alert(`File Details:\n\nTitle: ${upload.title}\nFilename: ${upload.filename}\nType: ${upload.upload_type}\nSize: ${upload.file_size}\nUser ID: ${upload.user_id}\nUploaded: ${new Date(upload.created_at).toLocaleString()}`);
+            showInfo(`File Details:\n\nTitle: ${upload.title}\nFilename: ${upload.filename}\nType: ${upload.upload_type}\nSize: ${upload.file_size}\nUser ID: ${upload.user_id}\nUploaded: ${new Date(upload.created_at).toLocaleString()}`);
         }
     };
 
@@ -365,7 +404,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const result = await taskCrud.readOne(id);
         if (result.success) {
             const task = result.data;
-            alert(`Task Details:\n\nTitle: ${task.title}\nDescription: ${task.description}\nPriority: ${task.priority}\nStatus: ${task.status}\nStaff ID: ${task.worker_id}\nForeman ID: ${task.foreman_id}\nCreated: ${new Date(task.created_at).toLocaleString()}`);
+            showInfo(`Task Details:\n\nTitle: ${task.title}\nDescription: ${task.description}\nPriority: ${task.priority}\nStatus: ${task.status}\nStaff ID: ${task.worker_id}\nForeman ID: ${task.foreman_id}\nCreated: ${new Date(task.created_at).toLocaleString()}`);
         }
     };
 
@@ -373,45 +412,45 @@ document.addEventListener('DOMContentLoaded', function() {
         const result = await complaintCrud.readOne(id);
         if (result.success) {
             const complaint = result.data;
-            alert(`Complaint Details:\n\nTitle: ${complaint.title}\nDescription: ${complaint.description}\nPriority: ${complaint.priority}\nStatus: ${complaint.status}\nClient ID: ${complaint.client_id}\nCreated: ${new Date(complaint.created_at).toLocaleString()}`);
+            showInfo(`Complaint Details:\n\nTitle: ${complaint.title}\nDescription: ${complaint.description}\nPriority: ${complaint.priority}\nStatus: ${complaint.status}\nClient ID: ${complaint.client_id}\nCreated: ${new Date(complaint.created_at).toLocaleString()}`);
         }
     };
 
     // Delete functions for other tables
     window.deleteUpload = async function(id) {
-        if (confirm('Are you sure you want to delete this file?')) {
+        showConfirmPopup('Delete File', 'Are you sure you want to delete this file?', async function() {
             const result = await uploadCrud.delete(id);
             if (result.success) {
-                alert('File deleted successfully!');
+                showSuccess('File deleted successfully!');
                 loadUploads();
             } else {
-                alert('Error: ' + (result.message || 'Unknown error'));
+                showError('Error: ' + (result.message || 'Unknown error'));
             }
-        }
+        });
     };
 
     window.deleteTask = async function(id) {
-        if (confirm('Are you sure you want to delete this task?')) {
+        showConfirmPopup('Delete Task', 'Are you sure you want to delete this task?', async function() {
             const result = await taskCrud.delete(id);
             if (result.success) {
-                alert('Task deleted successfully!');
+                showSuccess('Task deleted successfully!');
                 loadTasks();
             } else {
-                alert('Error: ' + (result.message || 'Unknown error'));
+                showError('Error: ' + (result.message || 'Unknown error'));
             }
-        }
+        });
     };
 
     window.deleteComplaint = async function(id) {
-        if (confirm('Are you sure you want to delete this complaint?')) {
+        showConfirmPopup('Delete Complaint', 'Are you sure you want to delete this complaint?', async function() {
             const result = await complaintCrud.delete(id);
             if (result.success) {
-                alert('Complaint deleted successfully!');
+                showSuccess('Complaint deleted successfully!');
                 loadComplaints();
             } else {
-                alert('Error: ' + (result.message || 'Unknown error'));
+                showError('Error: ' + (result.message || 'Unknown error'));
             }
-        }
+        });
     };
 
     // Load users on page load
@@ -420,7 +459,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Logout function
 async function logout() {
-    if (confirm('Are you sure you want to logout?')) {
+    showConfirmPopup('Logout', 'Are you sure you want to logout?', async function() {
         try {
             const response = await fetch('/logout', {
                 method: 'POST',
@@ -433,11 +472,13 @@ async function logout() {
             const result = await response.json();
             
             if (result.success) {
-                alert('Logged out successfully!');
-                window.location.href = '/login';
+                showSuccess('Logged out successfully!');
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 1500);
             }
         } catch (error) {
-            alert('Logout failed. Please try again.');
+            showError('Logout failed. Please try again.');
         }
-    }
+    });
 }

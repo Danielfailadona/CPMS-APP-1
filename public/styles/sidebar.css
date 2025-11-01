@@ -459,6 +459,54 @@ body {
   text-decoration: underline;
 }
 
+/* Eye Button Styles */
+.field {
+  position: relative;
+  width: 100%;
+}
+
+.field input {
+  width: 100%;
+  padding: 12px 42px 12px 12px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.field input:focus {
+  border-color: rgb(244, 123, 32);
+}
+
+.toggle-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 28px;
+  width: 34px;
+  border: none;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.toggle-btn:focus {
+  box-shadow: 0 0 0 3px rgba(244, 123, 32, 0.18);
+}
+
+.toggle-btn svg {
+  display: block;
+  height: 18px;
+  width: 18px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .sidebar {

@@ -32,8 +32,11 @@ class CrudHelper {
     // READ ALL - Get all records from any table
     async readAll() {
         try {
+            console.log('Fetching from:', this.baseUrl);
             const response = await fetch(this.baseUrl);
+            console.log('Response status:', response.status);
             const result = await response.json();
+            console.log('Response data:', result);
             return result.success ? result.data : [];
         } catch (error) {
             console.error('Read all error:', error);
