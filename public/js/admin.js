@@ -37,9 +37,22 @@ document.addEventListener('DOMContentLoaded', function() {
             authorization_notes: formData.get('authorization_notes')
         };
 
-        // Only include password if provided
+        // Password validation
         const password = formData.get('password');
+        const confirmPassword = formData.get('password_confirmation');
+        
         if (password) {
+            // Validate password requirements
+            if (!validatePasswordStrength(password)) {
+                return; // Error already shown in validation function
+            }
+            
+            // Validate password confirmation
+            if (!validatePasswordMatch(password, confirmPassword)) {
+                showError('Passwords do not match');
+                return;
+            }
+            
             data.password = password;
         }
 
@@ -452,6 +465,38 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     };
+
+    // Password validation functions
+    function validatePasswordStrength(password) {
+        // Check minimum length (9 characters)
+        if (password.length < 9) {
+            showError('Password must be at least 9 characters long');
+            return false;
+        }
+        
+        // Check for at least one special character
+        const specialCharRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (!specialCharRegex.test(password)) {
+            showError('Password must contain at least one special character (!@#$%^&*(),.?":{}|<>)');
+            return false;
+        }
+        
+        // Prohibit weak password "123456789"
+        if (password === '123456789') {
+            showError('Password "123456789" is not allowed. Please choose a stronger password.');
+            return false;
+        }
+        
+        return true;
+    }
+    
+    function validatePasswordMatch(password, confirmPassword) {
+        return password === confirmPassword;
+    }
+    
+    // Make validation functions globally available
+    window.validatePasswordStrength = validatePasswordStrength;
+    window.validatePasswordMatch = validatePasswordMatch;
 
     // Load users on page load
     loadUsers();

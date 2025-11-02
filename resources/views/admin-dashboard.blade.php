@@ -104,7 +104,7 @@
                                         </svg>
                                     </button>
                                 </div>
-                                <small class="password-hint">Must contain at least one special character</small>
+                                <small class="password-hint">Must be at least 9 characters long and contain at least one special character</small>
                             </div>
                         </div>
 
@@ -222,7 +222,7 @@
                                         </svg>
                                     </button>
                                 </div>
-                                <small class="password-hint">Leave blank to keep current password. Must contain at least one special character if changed.</small>
+                                <small class="password-hint">Leave blank to keep current password. Must be at least 9 characters long and contain at least one special character if changed.</small>
                             </div>
                         </div>
 
