@@ -886,4 +886,196 @@ if (typeFilter !== 'all') {
 }
 ```
 
-This reference covers all the JavaScript syntaxes and patterns used throughout the CPMS project. Each syntax includes its purpose, proper usage, and real examples from the codebase.
+### Animation-Related Syntaxes
+
+#### element.classList.add()
+**Description:** Adds CSS classes to elements for animations
+**Syntax:** `element.classList.add('className');`
+**Example:**
+```javascript
+element.classList.add('section-show');
+button.classList.add('active');
+```
+
+#### element.classList.remove()
+**Description:** Removes CSS classes from elements
+**Syntax:** `element.classList.remove('className');`
+**Example:**
+```javascript
+buttons.forEach(btn => {
+    btn.classList.remove('active');
+});
+```
+
+#### element.classList.toggle()
+**Description:** Toggles CSS classes on elements
+**Syntax:** `element.classList.toggle('className');`
+**Example:**
+```javascript
+dropdown.classList.toggle('show');
+panel.classList.toggle('panel-transition');
+```
+
+#### CSS Animation Properties
+**Description:** CSS properties that control animations
+**Syntax:** Various CSS animation properties
+**Example:**
+```css
+.container {
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.sidebar {
+    animation: slideInLeft 0.6s ease-out;
+}
+
+.popup-box {
+    animation: popupSlideIn 0.4s ease-out;
+}
+```
+
+#### CSS Transform Properties
+**Description:** CSS properties for element transformations
+**Syntax:** Various transform values
+**Example:**
+```css
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.popup-box {
+    transform: scale(1) translateY(0);
+}
+```
+
+#### CSS Transition Properties
+**Description:** CSS properties for smooth transitions
+**Syntax:** Various transition values
+**Example:**
+```css
+.btn {
+    transition: all 0.3s ease;
+}
+
+.toggle-btn {
+    transition: transform 0.2s ease;
+}
+```
+
+#### Animation Keyframes
+**Description:** CSS keyframe definitions for custom animations
+**Syntax:** `@keyframes animationName { }`
+**Example:**
+```css
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+```
+
+#### Animation Delay Properties
+**Description:** CSS properties to stagger animations
+**Syntax:** `animation-delay: time;`
+**Example:**
+```css
+.menu li:nth-child(1) { animation-delay: 0.1s; }
+.menu li:nth-child(2) { animation-delay: 0.2s; }
+.form-row:nth-child(1) .input-group { animation-delay: 0.1s; }
+```
+
+#### Animation Fill Mode
+**Description:** CSS property to control animation state
+**Syntax:** `animation-fill-mode: both;`
+**Example:**
+```css
+.main-content {
+    animation: fadeInRight 0.8s ease-out 0.2s both;
+}
+
+.profile {
+    animation: bounceIn 0.8s ease-out 0.3s both;
+}
+```
+
+### Panel Transition Functions
+
+#### showRegister()
+**Description:** Function to show registration panel with animations
+**Syntax:** `showRegister();`
+**Example:**
+```javascript
+function showRegister() {
+    const leftPanel = document.getElementById('left-panel');
+    const rightPanel = document.getElementById('right-panel');
+    // Panel content switching with animations
+}
+```
+
+#### showLogin()
+**Description:** Function to show login panel with animations
+**Syntax:** `showLogin();`
+**Example:**
+```javascript
+function showLogin() {
+    const leftPanel = document.getElementById('left-panel');
+    const rightPanel = document.getElementById('right-panel');
+    // Panel content switching with animations
+}
+```
+
+### Animation Event Handlers
+
+#### Button Active State Management
+**Description:** Managing active states for animated buttons
+**Syntax:** Button state management pattern
+**Example:**
+```javascript
+buttons.forEach(button => {
+    button.addEventListener('click', function() {
+        buttons.forEach(btn => {
+            btn.classList.remove('active');
+        });
+        this.classList.add('active');
+    });
+});
+```
+
+#### Section Show Animation
+**Description:** Function to show sections with animations
+**Syntax:** `showSection(sectionName);`
+**Example:**
+```javascript
+function showSection(sectionName) {
+    document.querySelectorAll('.section').forEach(section => {
+        section.style.display = 'none';
+    });
+    const targetSection = document.getElementById(sectionName + '-section');
+    if (targetSection) {
+        targetSection.style.display = 'block';
+        targetSection.classList.add('section-show');
+    }
+}
+```
+
+This reference covers all the JavaScript syntaxes and patterns used throughout the CPMS project, including the new animation-related syntaxes. Each syntax includes its purpose, proper usage, and real examples from the codebase.

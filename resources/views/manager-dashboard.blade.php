@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manager Dashboard - CPMS</title>
     <link rel="stylesheet" href="{{ asset('styles/sidebar.css') }}">
+    <link rel="stylesheet" href="{{ asset('styles/dashboard-animations.css') }}">
+    <link rel="stylesheet" href="{{ asset('styles/dashboard-animations.css') }}">
 </head>
 <body>
     <div class="container">

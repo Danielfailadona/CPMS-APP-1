@@ -355,4 +355,210 @@ window.globalFunction = function() {
 - **`window.`** - Global object property
 - **Global scope** - Accessible from anywhere
 
-This breakdown covers every syntax component used in your CPMS JavaScript files, explaining what each symbol, keyword, and operator does in the code.
+---
+
+## Animation-Related Syntax Components
+
+### CSS Class Manipulation
+```javascript
+element.classList.add('section-show');
+```
+- **`element`** - DOM element reference
+- **`.classList`** - Property for class manipulation
+- **`.add()`** - Method to add CSS class
+- **`'section-show'`** - CSS class name for animation
+
+### CSS Class Removal
+```javascript
+button.classList.remove('active');
+```
+- **`button`** - DOM element reference
+- **`.classList`** - Class list property
+- **`.remove()`** - Method to remove CSS class
+- **`'active'`** - CSS class name to remove
+
+### CSS Class Toggle
+```javascript
+dropdown.classList.toggle('show');
+```
+- **`dropdown`** - DOM element reference
+- **`.classList`** - Class list property
+- **`.toggle()`** - Method to toggle CSS class
+- **`'show'`** - CSS class name to toggle
+
+### Animation CSS Properties
+```css
+.container {
+    animation: fadeInUp 0.8s ease-out;
+}
+```
+- **`.container`** - CSS selector
+- **`{}`** - CSS rule block
+- **`animation:`** - CSS animation property
+- **`fadeInUp`** - Animation name
+- **`0.8s`** - Animation duration
+- **`ease-out`** - Animation timing function
+- **`;`** - CSS property terminator
+
+### CSS Transform Properties
+```css
+.btn:hover {
+    transform: translateY(-2px);
+}
+```
+- **`.btn:hover`** - CSS pseudo-class selector
+- **`transform:`** - CSS transform property
+- **`translateY()`** - Transform function
+- **`-2px`** - Negative pixel value (moves up)
+
+### CSS Transition Properties
+```css
+.toggle-btn {
+    transition: all 0.3s ease;
+}
+```
+- **`transition:`** - CSS transition property
+- **`all`** - Applies to all properties
+- **`0.3s`** - Transition duration
+- **`ease`** - Transition timing function
+
+### CSS Keyframe Definitions
+```css
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+```
+- **`@keyframes`** - CSS keyframe rule
+- **`fadeInUp`** - Animation name
+- **`{}`** - Keyframe block
+- **`from`** - Starting keyframe (0%)
+- **`to`** - Ending keyframe (100%)
+- **`opacity:`** - CSS opacity property
+- **`0`** - Fully transparent
+- **`1`** - Fully opaque
+- **`transform:`** - CSS transform property
+- **`translateY(30px)`** - Move down 30 pixels
+- **`translateY(0)`** - Original position
+
+### CSS Animation Delay
+```css
+.menu li:nth-child(1) { animation-delay: 0.1s; }
+```
+- **`.menu li:nth-child(1)`** - CSS nth-child selector
+- **`animation-delay:`** - CSS animation delay property
+- **`0.1s`** - Delay time in seconds
+
+### CSS Animation Fill Mode
+```css
+.profile {
+    animation: bounceIn 0.8s ease-out 0.3s both;
+}
+```
+- **`bounceIn`** - Animation name
+- **`0.8s`** - Animation duration
+- **`ease-out`** - Timing function
+- **`0.3s`** - Animation delay
+- **`both`** - Animation fill mode (applies styles before and after)
+
+### Panel Transition Functions
+```javascript
+function showRegister() {
+    const leftPanel = document.getElementById('left-panel');
+    leftPanel.innerHTML = `...`;
+}
+```
+- **`function`** - Function declaration keyword
+- **`showRegister()`** - Function name with parameters
+- **`const`** - Constant declaration
+- **`leftPanel`** - Variable name
+- **`document.getElementById()`** - DOM method
+- **`'left-panel'`** - Element ID string
+- **`.innerHTML`** - Property for HTML content
+- **`=`** - Assignment operator
+- **`` `...` ``** - Template literal for HTML
+
+### Button State Management
+```javascript
+buttons.forEach(button => {
+    button.addEventListener('click', function() {
+        this.classList.add('active');
+    });
+});
+```
+- **`buttons`** - Array/NodeList variable
+- **`.forEach()`** - Array iteration method
+- **`button =>`** - Arrow function parameter
+- **`button.addEventListener()`** - Event listener method
+- **`'click'`** - Event type string
+- **`function()`** - Anonymous function
+- **`this`** - Reference to clicked element
+- **`.classList.add()`** - Add CSS class method
+- **`'active'`** - CSS class name
+
+### Section Animation Display
+```javascript
+function showSection(sectionName) {
+    const targetSection = document.getElementById(sectionName + '-section');
+    if (targetSection) {
+        targetSection.style.display = 'block';
+        targetSection.classList.add('section-show');
+    }
+}
+```
+- **`function showSection()`** - Function declaration
+- **`sectionName`** - Function parameter
+- **`const targetSection`** - Constant declaration
+- **`sectionName + '-section'`** - String concatenation
+- **`if (targetSection)`** - Conditional check
+- **`.style.display`** - CSS display property
+- **`'block'`** - CSS display value
+- **`.classList.add()`** - Add animation class
+- **`'section-show'`** - Animation CSS class
+
+### CSS Responsive Animation
+```css
+@media (max-width: 768px) {
+    .login-box {
+        animation: fadeInUp 0.8s ease-out;
+    }
+}
+```
+- **`@media`** - CSS media query
+- **`(max-width: 768px)`** - Media condition
+- **`.login-box`** - CSS selector
+- **`animation:`** - Animation property
+- **`fadeInUp 0.8s ease-out`** - Animation values
+
+### CSS Animation Timing Functions
+```css
+.popup-box {
+    animation: popupSlideIn 0.4s ease-out;
+}
+```
+- **`ease-out`** - Starts fast, ends slow
+- **`ease-in`** - Starts slow, ends fast
+- **`ease-in-out`** - Starts slow, fast middle, ends slow
+- **`linear`** - Constant speed
+
+### CSS Transform Functions
+```css
+.element {
+    transform: translateX(-50px) scale(0.9) rotate(45deg);
+}
+```
+- **`translateX()`** - Move horizontally
+- **`translateY()`** - Move vertically
+- **`scale()`** - Resize element
+- **`rotate()`** - Rotate element
+- **`-50px`** - Negative value (left/up)
+- **`0.9`** - Scale factor (90% size)
+- **`45deg`** - Rotation angle in degrees
+
+This breakdown covers every syntax component used in your CPMS JavaScript and CSS files, including all animation-related syntaxes, explaining what each symbol, keyword, and operator does in the code.
