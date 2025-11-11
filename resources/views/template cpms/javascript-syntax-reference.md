@@ -374,17 +374,26 @@ setTimeout(() => {
 ## Custom Functions
 
 ### CrudHelper Class
-**Description:** Custom class for database operations
+**Description:** Custom class for database operations with Laravel model validation
 **Syntax:** `const crud = new CrudHelper('tableName');`
 **Example:**
 ```javascript
 const userCrud = new CrudHelper('users');
 const uploadCrud = new CrudHelper('uploads');
+const productCrud = new CrudHelper('products'); // Now with validation!
 
 // Usage
 const users = await userCrud.readAll();
 const result = await userCrud.create(data);
 const updateResult = await userCrud.update(id, data);
+
+// Products now use Laravel validation automatically
+const product = await productCrud.create({
+    name: 'Safety Helmet',
+    price: 29.99,
+    category: 'Safety Equipment',
+    stock_quantity: 100
+});
 ```
 
 ### Custom Popup Functions
@@ -436,7 +445,7 @@ form.addEventListener('submit', async function(e) {
 });
 ```
 
-### 3. CRUD Operation Pattern
+### 3. CRUD Operation Pattern (with Validation)
 ```javascript
 try {
     const result = await crudHelper.operation(data);
@@ -448,6 +457,27 @@ try {
     }
 } catch (error) {
     showError('Error processing request');
+}
+```
+
+### 3a. CRUD Validation Error Handling Pattern
+```javascript
+try {
+    const result = await productCrud.create(data);
+    if (result.success) {
+        showSuccess(result.message);
+    } else {
+        // Handle validation errors
+        if (result.errors) {
+            Object.keys(result.errors).forEach(field => {
+                showError(`${field}: ${result.errors[field][0]}`);
+            });
+        } else {
+            showError(result.message);
+        }
+    }
+} catch (error) {
+    showError('Network error occurred');
 }
 ```
 
@@ -1078,4 +1108,93 @@ function showSection(sectionName) {
 }
 ```
 
-This reference covers all the JavaScript syntaxes and patterns used throughout the CPMS project, including the new animation-related syntaxes. Each syntax includes its purpose, proper usage, and real examples from the codebase.
+### Laravel Model Validation Integration
+
+#### Validation Error Response Handling
+**Description:** Handling Laravel validation errors from API responses
+**Syntax:** `if (result.errors) { /* handle validation errors */ }`
+**Example:**
+```javascript
+const result = await productCrud.create(productData);
+if (!result.success && result.errors) {
+    // Laravel validation errors
+    Object.keys(result.errors).forEach(field => {
+        const errorMessage = result.errors[field][0]; // First error for field
+        showError(`${field}: ${errorMessage}`);
+    });
+}
+```
+
+#### Model-Specific CRUD Operations
+**Description:** Using CrudHelper with Laravel model validation
+**Syntax:** `const modelCrud = new CrudHelper('modelTable');`
+**Example:**
+```javascript
+// Products table now uses Product model validation
+const productCrud = new CrudHelper('products');
+
+// This will validate using Product::rules()
+const newProduct = await productCrud.create({
+    name: 'Construction Helmet',
+    description: 'Safety equipment for workers',
+    price: 29.99,
+    category: 'Safety',
+    stock_quantity: 50,
+    is_active: true
+});
+
+// This will validate using Product::updateRules()
+const updatedProduct = await productCrud.update(1, {
+    price: 34.99,
+    stock_quantity: 75
+});
+```
+
+#### Validation Error Object Structure
+**Description:** Structure of Laravel validation error responses
+**Syntax:** `{ success: false, message: 'Validation failed', errors: {} }`
+**Example:**
+```javascript
+// Example validation error response
+const errorResponse = {
+    success: false,
+    message: 'Validation failed',
+    errors: {
+        name: ['The name field is required.'],
+        price: ['The price must be at least 0.'],
+        category: ['The category field is required.']
+    }
+};
+
+// Handling multiple errors per field
+Object.keys(errorResponse.errors).forEach(field => {
+    errorResponse.errors[field].forEach(error => {
+        console.log(`${field}: ${error}`);
+    });
+});
+```
+
+#### Enhanced Success Response Structure
+**Description:** Enhanced success responses with model data
+**Syntax:** `{ success: true, message: 'Record created successfully with validation', data: {} }`
+**Example:**
+```javascript
+// Example enhanced success response
+const successResponse = {
+    success: true,
+    message: 'Record created successfully with validation',
+    id: 1,
+    data: {
+        id: 1,
+        name: 'Safety Helmet',
+        price: '29.99',
+        category: 'Safety Equipment',
+        stock_quantity: 100,
+        is_active: true,
+        created_at: '2025-11-11T13:31:13.000000Z',
+        updated_at: '2025-11-11T13:31:13.000000Z'
+    }
+};
+```
+
+This reference covers all the JavaScript syntaxes and patterns used throughout the CPMS project, including animation-related syntaxes and Laravel model validation integration. Each syntax includes its purpose, proper usage, and real examples from the codebase.
