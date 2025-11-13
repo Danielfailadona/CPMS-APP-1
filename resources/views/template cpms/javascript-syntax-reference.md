@@ -1558,4 +1558,520 @@ const statusText = task.status.replace('_', ' ').toUpperCase();
 // 'in_progress' becomes 'IN PROGRESS'
 ```
 
-This reference covers all the JavaScript syntaxes and patterns used throughout the CPMS project, including animation-related syntaxes, Laravel model validation integration, error prevention patterns, modal management, duplicate validation, enhanced filtering, and professional form handling. Each syntax includes its purpose, proper usage, and real examples from the codebase.
+---
+
+## Professional File Viewer Modal System
+
+### viewUpload() Function
+**Description:** Professional modal for viewing files with image preview capabilities
+**Syntax:** `viewUpload(uploadId);`
+**Example:**
+```javascript
+window.viewUpload = async function(uploadId) {
+    const upload = uploads.find(u => u.id == uploadId);
+    if (!upload) {
+        showError('File not found');
+        return;
+    }
+    
+    const isImage = /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(upload.filename);
+    
+    const modalHTML = `
+        <div id="file-viewer-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; align-items: center; justify-content: center;">
+            <div style="background: white; padding: 30px; border-radius: 10px; max-width: 80%; max-height: 80%; overflow: auto; position: relative;">
+                <button onclick="closeFileViewer()" style="position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+                
+                <h3 style="margin-top: 0; color: rgb(244, 123, 32);">${upload.title || upload.filename}</h3>
+                
+                ${isImage ? `
+                    <div style="text-align: center; margin: 20px 0;">
+                        <img src="/storage/uploads/${upload.filename}" alt="${upload.title || upload.filename}" style="max-width: 100%; max-height: 400px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                    </div>
+                ` : `
+                    <div style="text-align: center; margin: 20px 0; padding: 40px; background: #f8f9fa; border-radius: 8px;">
+                        <div style="font-size: 48px; color: #6c757d; margin-bottom: 10px;">📄</div>
+                        <p style="color: #6c757d; margin: 0;">Preview not available for this file type</p>
+                    </div>
+                `}
+                
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
+                    <p><strong>Filename:</strong> ${upload.filename}</p>
+                    <p><strong>Upload Date:</strong> ${new Date(upload.created_at).toLocaleDateString()}</p>
+                    <p><strong>Type:</strong> ${upload.upload_type || 'General'}</p>
+                    <p><strong>Status:</strong> ${upload.is_public ? 'Public' : 'Private'}</p>
+                    ${upload.description ? `<p><strong>Description:</strong> ${upload.description}</p>` : ''}
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <a href="/storage/uploads/${upload.filename}" download="${upload.filename}" style="display: inline-block; padding: 10px 20px; background: rgb(244, 123, 32); color: white; text-decoration: none; border-radius: 5px; margin-right: 10px;">Download File</a>
+                    <button onclick="closeFileViewer()" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">Close</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Close on outside click
+    document.addEventListener('click', function(e) {
+        const modal = document.getElementById('file-viewer-modal');
+        if (modal && e.target === modal) {
+            closeFileViewer();
+        }
+    });
+};
+
+window.closeFileViewer = function() {
+    const modal = document.getElementById('file-viewer-modal');
+    if (modal) {
+        modal.remove();
+    }
+};
+```
+
+### File Type Detection
+**Description:** Regular expression to detect image file types
+**Syntax:** `/\.(extension1|extension2)$/i.test(filename)`
+**Example:**
+```javascript
+const isImage = /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(upload.filename);
+const isPDF = /\.pdf$/i.test(upload.filename);
+const isVideo = /\.(mp4|avi|mov|wmv)$/i.test(upload.filename);
+```
+
+### Modal Outside Click Handler
+**Description:** Closes modal when clicking outside the content area
+**Syntax:** `if (modal && e.target === modal) { closeModal(); }`
+**Example:**
+```javascript
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('file-viewer-modal');
+    if (modal && e.target === modal) {
+        closeFileViewer();
+    }
+});
+```
+
+---
+
+## Enhanced Search and Filter System
+
+### Multi-Field Search Pattern
+**Description:** Search across multiple object properties simultaneously
+**Syntax:** `array.filter(item => field1.includes(term) || field2.includes(term))`
+**Example:**
+```javascript
+function loadTasks(applyFilters = false) {
+    let filteredTasks = tasks;
+    
+    if (applyFilters) {
+        const searchElement = document.getElementById('search-tasks');
+        const searchTerm = searchElement ? searchElement.value.toLowerCase() : '';
+        
+        if (searchTerm) {
+            filteredTasks = filteredTasks.filter(task => 
+                (task.title && task.title.toLowerCase().includes(searchTerm)) ||
+                (task.description && task.description.toLowerCase().includes(searchTerm)) ||
+                (task.staff_name && task.staff_name.toLowerCase().includes(searchTerm))
+            );
+        }
+    }
+}
+```
+
+### Combined Filter Application
+**Description:** Apply multiple filters sequentially to refine results
+**Syntax:** `let filtered = data; if (condition) filtered = filtered.filter(...);`
+**Example:**
+```javascript
+let filteredUploads = [...uploads];
+
+if (applyFilters) {
+    const searchTerm = document.getElementById('search-files')?.value?.toLowerCase() || '';
+    const typeFilter = document.getElementById('type-filter')?.value || 'all';
+    const statusFilter = document.getElementById('status-filter')?.value || 'all';
+    
+    if (searchTerm) {
+        filteredUploads = filteredUploads.filter(upload => 
+            (upload.title && upload.title.toLowerCase().includes(searchTerm)) ||
+            (upload.filename && upload.filename.toLowerCase().includes(searchTerm))
+        );
+    }
+    
+    if (typeFilter !== 'all') {
+        filteredUploads = filteredUploads.filter(upload => upload.upload_type === typeFilter);
+    }
+    
+    if (statusFilter !== 'all') {
+        const isPublic = statusFilter === 'public';
+        filteredUploads = filteredUploads.filter(upload => upload.is_public === isPublic);
+    }
+}
+```
+
+### Search Input Event Handling
+**Description:** Real-time search on Enter key press
+**Syntax:** `input.addEventListener('keyup', function(e) { if (e.key === 'Enter') search(); });`
+**Example:**
+```javascript
+const searchInput = document.getElementById('search-users');
+if (searchInput) {
+    searchInput.addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') {
+            loadUsers(true);
+        }
+    });
+}
+```
+
+---
+
+## Professional Modal-Based Editing
+
+### Dynamic Modal Creation
+**Description:** Create modals with pre-filled form data
+**Syntax:** `document.body.insertAdjacentHTML('beforeend', modalHTML);`
+**Example:**
+```javascript
+window.editComplaint = async function(complaintId) {
+    const complaint = complaints.find(c => c.id == complaintId);
+    
+    if (complaint.status === 'resolved' || complaint.status === 'closed') {
+        showError('Cannot edit resolved or closed complaints.');
+        return;
+    }
+    
+    const modalHTML = `
+        <div id="edit-complaint-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; align-items: center; justify-content: center;">
+            <div style="background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 500px; position: relative;">
+                <button onclick="closeEditModal()" style="position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+                
+                <h3 style="margin-top: 0; color: rgb(244, 123, 32);">Edit Complaint</h3>
+                
+                <form id="edit-complaint-form">
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Title:</label>
+                        <input type="text" id="edit-title" value="${complaint.title}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Description:</label>
+                        <textarea id="edit-description" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; height: 100px;" required>${complaint.description}</textarea>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Priority:</label>
+                        <select id="edit-priority" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            <option value="low" ${complaint.priority === 'low' ? 'selected' : ''}>Low</option>
+                            <option value="medium" ${complaint.priority === 'medium' ? 'selected' : ''}>Medium</option>
+                            <option value="high" ${complaint.priority === 'high' ? 'selected' : ''}>High</option>
+                            <option value="urgent" ${complaint.priority === 'urgent' ? 'selected' : ''}>Urgent</option>
+                        </select>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <button type="submit" style="padding: 10px 20px; background: rgb(244, 123, 32); color: white; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px;">Update Complaint</button>
+                        <button type="button" onclick="closeEditModal()" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Handle form submission
+    document.getElementById('edit-complaint-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const updateData = {
+            title: document.getElementById('edit-title').value,
+            description: document.getElementById('edit-description').value,
+            priority: document.getElementById('edit-priority').value
+        };
+        
+        try {
+            const result = await complaintCrud.update(complaintId, updateData);
+            if (result.success) {
+                showSuccess('Complaint updated successfully!');
+                closeEditModal();
+                loadComplaints();
+            } else {
+                showError('Error: ' + result.message);
+            }
+        } catch (error) {
+            showError('Error updating complaint');
+        }
+    });
+};
+
+window.closeEditModal = function() {
+    const modal = document.getElementById('edit-complaint-modal');
+    if (modal) {
+        modal.remove();
+    }
+};
+```
+
+### Pre-filled Select Options
+**Description:** Set selected option based on existing data
+**Syntax:** `<option value="val" ${condition ? 'selected' : ''}>Label</option>`
+**Example:**
+```javascript
+<select id="edit-priority">
+    <option value="low" ${complaint.priority === 'low' ? 'selected' : ''}>Low</option>
+    <option value="medium" ${complaint.priority === 'medium' ? 'selected' : ''}>Medium</option>
+    <option value="high" ${complaint.priority === 'high' ? 'selected' : ''}>High</option>
+    <option value="urgent" ${complaint.priority === 'urgent' ? 'selected' : ''}>Urgent</option>
+</select>
+```
+
+---
+
+## Status-Based Conditional Logic
+
+### Status Validation Before Operations
+**Description:** Check record status before allowing modifications
+**Syntax:** `if (record.status === 'target_status') { /* prevent operation */ }`
+**Example:**
+```javascript
+if (complaint.status === 'resolved' || complaint.status === 'closed') {
+    showError('Cannot edit resolved or closed complaints.');
+    return;
+}
+
+// Allow editing for open complaints
+showEditComplaintModal(complaint);
+```
+
+### Conditional Button Rendering
+**Description:** Show/hide buttons based on record status
+**Syntax:** `${condition ? 'html' : ''}`
+**Example:**
+```javascript
+const actionsHTML = `
+    <div class="complaint-actions">
+        ${complaint.status !== 'resolved' && complaint.status !== 'closed' ? `
+            <button class="edit-btn" onclick="editComplaint(${complaint.id})">Edit</button>
+        ` : ''}
+        ${complaint.status === 'resolved' ? `
+            <button class="delete-btn" onclick="deleteComplaint(${complaint.id})">Delete</button>
+        ` : ''}
+    </div>
+`;
+```
+
+### Status Text Formatting
+**Description:** Format status strings for display
+**Syntax:** `status.replace('_', ' ').toUpperCase()`
+**Example:**
+```javascript
+const statusText = task.status.replace('_', ' ').toUpperCase();
+// 'in_progress' becomes 'IN PROGRESS'
+
+const formattedStatus = complaint.status.charAt(0).toUpperCase() + complaint.status.slice(1);
+// 'open' becomes 'Open'
+```
+
+---
+
+## Enhanced Error Prevention Patterns
+
+### Comprehensive Null Checking
+**Description:** Check element existence before manipulation
+**Syntax:** `const element = document.getElementById('id'); if (element) { /* use element */ }`
+**Example:**
+```javascript
+function resetForm() {
+    const form = document.getElementById('userForm');
+    if (form) {
+        form.reset();
+    }
+    
+    const createBtn = document.getElementById('createBtn');
+    const updateBtn = document.getElementById('updateBtn');
+    
+    if (createBtn) createBtn.style.display = 'inline-block';
+    if (updateBtn) updateBtn.style.display = 'none';
+    
+    currentEditingId = null;
+}
+```
+
+### Safe Filter Element Access
+**Description:** Safely access filter form elements with fallbacks
+**Syntax:** `const value = element?.value || defaultValue;`
+**Example:**
+```javascript
+function loadUsers(applyFilters = false) {
+    let filteredUsers = [...users];
+    
+    if (applyFilters) {
+        const searchElement = document.getElementById('search-users');
+        const roleElement = document.getElementById('role-filter');
+        const statusElement = document.getElementById('status-filter');
+        
+        const searchTerm = searchElement ? searchElement.value.toLowerCase() : '';
+        const roleFilter = roleElement ? roleElement.value : 'all';
+        const statusFilter = statusElement ? statusElement.value : 'all';
+        
+        if (searchTerm) {
+            filteredUsers = filteredUsers.filter(user => 
+                (user.name && user.name.toLowerCase().includes(searchTerm)) ||
+                (user.email && user.email.toLowerCase().includes(searchTerm))
+            );
+        }
+    }
+}
+```
+
+### Runtime Error Prevention
+**Description:** Prevent errors with comprehensive checking
+**Syntax:** `if (!element) { console.error('Element not found'); return; }`
+**Example:**
+```javascript
+function loadUploads(applyFilters = false) {
+    const uploadsList = document.getElementById('uploads-list');
+    if (!uploadsList) {
+        console.error('Uploads list element not found');
+        return;
+    }
+    
+    let filteredUploads = [...uploads];
+    
+    if (applyFilters) {
+        const searchInput = document.getElementById('search-files');
+        const typeFilter = document.getElementById('type-filter');
+        
+        const searchTerm = searchInput?.value?.toLowerCase() || '';
+        const typeValue = typeFilter?.value || 'all';
+        
+        // Apply filters safely
+        if (searchTerm && filteredUploads) {
+            filteredUploads = filteredUploads.filter(upload => 
+                upload.title?.toLowerCase().includes(searchTerm) ||
+                upload.filename?.toLowerCase().includes(searchTerm)
+            );
+        }
+    }
+}
+```
+
+---
+
+## Duplicate Validation and Error Handling
+
+### Server-Side Duplicate Detection
+**Description:** Handle duplicate validation responses from server
+**Syntax:** `if (result.message && result.message.includes('already exists')) { }`
+**Example:**
+```javascript
+try {
+    const result = await userCrud.create(data);
+    if (result.success) {
+        showSuccess('User created successfully!');
+        resetForm();
+        loadUsers();
+    } else {
+        if (result.message && result.message.includes('already exists')) {
+            showError(result.message);
+        } else {
+            showError('Error: ' + (result.message || 'Unknown error'));
+        }
+    }
+} catch (error) {
+    console.error('Error creating user:', error);
+    showError('Network error occurred');
+}
+```
+
+### HTTP Status Code Handling
+**Description:** Handle specific HTTP status codes for duplicates
+**Syntax:** `if (response.status === 409) { /* handle conflict */ }`
+**Example:**
+```javascript
+if (response.status === 409) {
+    const error = await response.json();
+    showError(error.message || 'Duplicate record detected');
+    return;
+}
+
+if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+}
+```
+
+---
+
+## Advanced Modal Management
+
+### Modal Backdrop Styling
+**Description:** Create professional modal overlays with proper styling
+**Syntax:** `style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8);"`
+**Example:**
+```javascript
+const modalHTML = `
+    <div id="modal" style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    ">
+        <div style="
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 80%;
+            max-height: 80%;
+            overflow: auto;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        ">
+            <!-- Modal content -->
+        </div>
+    </div>
+`;
+```
+
+### Modal Close Button
+**Description:** Styled close button for modals
+**Syntax:** `<button onclick="closeModal()" style="position: absolute; top: 10px; right: 15px;">&times;</button>`
+**Example:**
+```javascript
+<button onclick="closeFileViewer()" style="
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+">&times;</button>
+```
+
+### Modal Event Cleanup
+**Description:** Remove event listeners when closing modals
+**Syntax:** `modal.remove(); // Automatically removes event listeners`
+**Example:**
+```javascript
+window.closeModal = function() {
+    const modal = document.getElementById('modal-id');
+    if (modal) {
+        modal.remove(); // This removes the element and its event listeners
+    }
+};
+```
+
+This reference covers all the JavaScript syntaxes and patterns used throughout the CPMS project, including animation-related syntaxes, Laravel model validation integration, error prevention patterns, modal management, duplicate validation, enhanced filtering, professional form handling, file viewer modals with image preview, status-based conditional logic, and comprehensive error prevention. Each syntax includes its purpose, proper usage, and real examples from the codebase.

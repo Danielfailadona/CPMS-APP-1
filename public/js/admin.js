@@ -536,9 +536,119 @@ document.addEventListener('DOMContentLoaded', function() {
         const result = await uploadCrud.readOne(id);
         if (result.success) {
             const upload = result.data;
-            showInfo(`File Details:\n\nTitle: ${upload.title}\nFilename: ${upload.filename}\nType: ${upload.upload_type}\nSize: ${upload.file_size}\nUser ID: ${upload.user_id}\nUploaded: ${new Date(upload.created_at).toLocaleString()}`);
+            showFileViewerModal(upload);
         }
     };
+    
+    // Show file viewer modal with image preview
+    function showFileViewerModal(upload) {
+        const modalHTML = `
+            <div id="file-viewer-modal" style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+            ">
+                <div style="
+                    background: white;
+                    padding: 20px;
+                    border-radius: 10px;
+                    max-width: 80%;
+                    max-height: 80%;
+                    overflow-y: auto;
+                    position: relative;
+                ">
+                    <button onclick="closeFileViewer()" style="
+                        position: absolute;
+                        top: 10px;
+                        right: 15px;
+                        background: none;
+                        border: none;
+                        font-size: 24px;
+                        cursor: pointer;
+                        color: #666;
+                    ">×</button>
+                    
+                    <h3 style="margin-top: 0; color: rgb(244, 123, 32);">${upload.title || upload.filename}</h3>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <strong>Filename:</strong> ${upload.filename}<br>
+                        <strong>Type:</strong> ${getUploadTypeLabel(upload.upload_type)}<br>
+                        <strong>Size:</strong> ${upload.file_size}<br>
+                        <strong>User ID:</strong> ${upload.user_id}<br>
+                        <strong>Uploaded:</strong> ${new Date(upload.created_at).toLocaleString()}<br>
+                        <strong>Status:</strong> ${upload.is_public ? 'Public' : 'Private'}
+                    </div>
+                    
+                    ${upload.description ? `
+                        <div style="margin-bottom: 15px;">
+                            <strong>Description:</strong><br>
+                            <p style="background: #f5f5f5; padding: 10px; border-radius: 5px;">${upload.description}</p>
+                        </div>
+                    ` : ''}
+                    
+                    <div id="file-content" style="text-align: center;">
+                        ${upload.mime_type && upload.mime_type.startsWith('image/') ? `
+                            <img src="/download-file?path=${encodeURIComponent(upload.file_path)}&filename=${encodeURIComponent(upload.filename)}" 
+                                 style="max-width: 100%; max-height: 400px; border-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" 
+                                 alt="${upload.filename}">
+                        ` : `
+                            <div style="padding: 20px; background: #f0f0f0; border-radius: 5px; margin: 10px 0;">
+                                <p><strong>File:</strong> ${upload.filename}</p>
+                                <p>This file type cannot be previewed. Click download to view the file.</p>
+                                <button onclick="downloadFile('${upload.file_path}', '${upload.filename}')" 
+                                        style="background: rgb(244, 123, 32); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                                    Download File
+                                </button>
+                            </div>
+                        `}
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+    }
+    
+    // Close file viewer modal
+    window.closeFileViewer = function() {
+        const modal = document.getElementById('file-viewer-modal');
+        if (modal) {
+            modal.remove();
+        }
+    };
+    
+    // Download file from modal
+    window.downloadFile = function(filePath, filename) {
+        const url = `/download-file?path=${encodeURIComponent(filePath)}&filename=${encodeURIComponent(filename)}`;
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    };
+    
+    // Helper function to get upload type label
+    function getUploadTypeLabel(type) {
+        const types = {
+            'task': 'Task Related',
+            'image': 'Image',
+            'report': 'Report',
+            'document': 'Document',
+            'blueprint': 'Blueprint',
+            'safety': 'Safety Document',
+            'inspection': 'Inspection Report',
+            'other': 'Other'
+        };
+        return types[type] || type;
+    }
 
     window.viewTask = async function(id) {
         try {
@@ -641,6 +751,14 @@ document.addEventListener('DOMContentLoaded', function() {
     window.validatePasswordStrength = validatePasswordStrength;
     window.validatePasswordMatch = validatePasswordMatch;
 
+    // Close modal when clicking outside
+    document.addEventListener('click', function(e) {
+        const modal = document.getElementById('file-viewer-modal');
+        if (modal && e.target === modal) {
+            closeFileViewer();
+        }
+    });
+    
     // Load users on page load
     loadUsers();
     

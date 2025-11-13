@@ -1066,5 +1066,516 @@ const statusText = task.status.replace('_', ' ').toUpperCase();
 - **`${task.status}`** - Variable interpolation in class name
 - **`${statusText}`** - Variable interpolation for display text
 
-This breakdown covers every syntax component used in your CPMS JavaScript and CSS files, including animation-related syntaxes, Laravel model validation integration, error prevention patterns, modal management, duplicate validation, enhanced filtering, and professional form handling, explaining what each symbol, keyword, and operator does in the code.
+---
+
+## Professional File Viewer Modal Syntax Components
+
+### File Type Detection Regular Expression
+```javascript
+const isImage = /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(upload.filename);
+```
+- **`/`** - Regular expression delimiter start
+- **`\.`** - Escaped dot (literal period)
+- **`(`** - Group start
+- **`jpg|jpeg|png|gif|bmp|webp`** - Alternative patterns (OR)
+- **`|`** - OR operator in regex
+- **`)`** - Group end
+- **`$`** - End of string anchor
+- **`/i`** - Regular expression delimiter end with case-insensitive flag
+- **`.test()`** - Method to test if string matches pattern
+- **`upload.filename`** - String to test against pattern
+
+### Conditional Image Preview Rendering
+```javascript
+${isImage ? `
+    <div style="text-align: center;">
+        <img src="/storage/uploads/${upload.filename}" alt="${upload.title}">
+    </div>
+` : `
+    <div style="text-align: center;">
+        <div style="font-size: 48px;">📄</div>
+        <p>Preview not available</p>
+    </div>
+`}
+```
+- **`${}`** - Template literal expression
+- **`isImage`** - Boolean condition variable
+- **`?`** - Ternary operator (if)
+- **`` ` ``** - Template literal for true case
+- **`:`** - Ternary operator separator (else)
+- **`` ` ``** - Template literal for false case
+- **`<img src="/storage/uploads/${upload.filename}">`** - Dynamic image source
+- **`alt="${upload.title}"`** - Dynamic alt text
+- **`📄`** - Unicode emoji character
+
+### Modal Backdrop Click Detection
+```javascript
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('file-viewer-modal');
+    if (modal && e.target === modal) {
+        closeFileViewer();
+    }
+});
+```
+- **`document.addEventListener()`** - Global event listener
+- **`'click'`** - Event type string
+- **`function(e)`** - Event handler function
+- **`e`** - Event object parameter
+- **`const modal`** - Modal element variable
+- **`e.target`** - Element that was clicked
+- **`=== modal`** - Strict equality check
+- **`closeFileViewer()`** - Function call to close modal
+
+### Dynamic Download Link
+```javascript
+<a href="/storage/uploads/${upload.filename}" download="${upload.filename}" style="...">
+```
+- **`<a href="...">`** - Anchor element with dynamic href
+- **`/storage/uploads/`** - File path prefix
+- **`${upload.filename}`** - Dynamic filename interpolation
+- **`download="${upload.filename}"`** - Download attribute with dynamic filename
+- **`style="..."`** - Inline CSS styling
+
+---
+
+## Enhanced Search and Filter Syntax Components
+
+### Multi-Field Search Filter
+```javascript
+filteredTasks = filteredTasks.filter(task => 
+    (task.title && task.title.toLowerCase().includes(searchTerm)) ||
+    (task.description && task.description.toLowerCase().includes(searchTerm)) ||
+    (task.staff_name && task.staff_name.toLowerCase().includes(searchTerm))
+);
+```
+- **`filteredTasks`** - Array variable
+- **`.filter()`** - Array method to create filtered array
+- **`task =>`** - Arrow function parameter
+- **`(`** - Grouping parentheses for condition
+- **`task.title`** - Object property access
+- **`&&`** - Logical AND operator
+- **`task.title.toLowerCase()`** - String method chaining
+- **`.includes(searchTerm)`** - String search method
+- **`)`** - End grouping parentheses
+- **`||`** - Logical OR operator between conditions
+- **Multiple OR conditions** - Search across multiple fields
+
+### Safe Element Access with Fallback
+```javascript
+const searchTerm = searchElement ? searchElement.value.toLowerCase() : '';
+```
+- **`const searchTerm`** - Variable declaration
+- **`searchElement`** - Element variable (may be null)
+- **`?`** - Ternary operator condition
+- **`searchElement.value.toLowerCase()`** - Property access and method call
+- **`:`** - Ternary operator separator
+- **`''`** - Default empty string fallback
+
+### Optional Chaining with Fallback
+```javascript
+const searchTerm = document.getElementById('search-files')?.value?.toLowerCase() || '';
+```
+- **`document.getElementById('search-files')`** - DOM method
+- **`?.`** - Optional chaining operator
+- **`.value`** - Property access (only if element exists)
+- **`?.toLowerCase()`** - Method call (only if value exists)
+- **`||`** - Logical OR operator
+- **`''`** - Fallback empty string
+
+### Sequential Filter Application
+```javascript
+let filteredUploads = [...uploads];
+
+if (searchTerm) {
+    filteredUploads = filteredUploads.filter(upload => condition);
+}
+
+if (typeFilter !== 'all') {
+    filteredUploads = filteredUploads.filter(upload => upload.upload_type === typeFilter);
+}
+```
+- **`let filteredUploads`** - Mutable variable declaration
+- **`[...uploads]`** - Spread operator to create array copy
+- **`if (searchTerm)`** - Conditional filter application
+- **`filteredUploads = filteredUploads.filter()`** - Reassignment with filtered result
+- **`!== 'all'`** - Not equal comparison
+- **`upload.upload_type === typeFilter`** - Exact match comparison
+
+### Enter Key Event Handling
+```javascript
+searchInput.addEventListener('keyup', function(e) {
+    if (e.key === 'Enter') {
+        loadUsers(true);
+    }
+});
+```
+- **`searchInput`** - Input element variable
+- **`.addEventListener()`** - Event listener method
+- **`'keyup'`** - Keyboard event type
+- **`function(e)`** - Event handler function
+- **`e.key`** - Pressed key property
+- **`=== 'Enter'`** - Strict equality check for Enter key
+- **`loadUsers(true)`** - Function call with boolean parameter
+
+---
+
+## Professional Modal-Based Editing Syntax Components
+
+### Pre-filled Form Input Values
+```javascript
+<input type="text" id="edit-title" value="${complaint.title}" style="..." required>
+```
+- **`<input type="text"`** - Text input element
+- **`id="edit-title"`** - Unique identifier
+- **`value="${complaint.title}"`** - Pre-filled value from data
+- **`${complaint.title}`** - Template literal interpolation
+- **`style="..."`** - Inline CSS styling
+- **`required`** - HTML5 validation attribute
+- **`>`** - Element closing
+
+### Pre-filled Textarea Content
+```javascript
+<textarea id="edit-description" style="..." required>${complaint.description}</textarea>
+```
+- **`<textarea id="edit-description"`** - Textarea element with ID
+- **`style="..."`** - Inline CSS styling
+- **`required`** - HTML5 validation attribute
+- **`>`** - Opening tag end
+- **`${complaint.description}`** - Pre-filled content
+- **`</textarea>`** - Closing tag
+
+### Dynamic Select Option Selection
+```javascript
+<option value="low" ${complaint.priority === 'low' ? 'selected' : ''}>Low</option>
+```
+- **`<option value="low"`** - Option element with value
+- **`${}`** - Template literal expression
+- **`complaint.priority === 'low'`** - Condition check
+- **`?`** - Ternary operator (if)
+- **`'selected'`** - HTML selected attribute
+- **`:`** - Ternary operator separator (else)
+- **`''`** - Empty string (no attribute)
+- **`>Low</option>`** - Option text and closing tag
+
+### Modal Form Submission Handling
+```javascript
+document.getElementById('edit-complaint-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const updateData = {
+        title: document.getElementById('edit-title').value,
+        description: document.getElementById('edit-description').value,
+        priority: document.getElementById('edit-priority').value
+    };
+});
+```
+- **`document.getElementById('edit-complaint-form')`** - Get form element
+- **`.addEventListener('submit', ...)`** - Form submission event
+- **`async function(e)`** - Async event handler
+- **`e.preventDefault()`** - Prevent default form submission
+- **`const updateData`** - Object for form data
+- **`{}`** - Object literal syntax
+- **`title:`** - Object property key
+- **`document.getElementById('edit-title').value`** - Get input value
+- **`,`** - Property separator
+
+### Modal Cleanup Function
+```javascript
+window.closeEditModal = function() {
+    const modal = document.getElementById('edit-complaint-modal');
+    if (modal) {
+        modal.remove();
+    }
+};
+```
+- **`window.closeEditModal`** - Global function assignment
+- **`= function()`** - Function expression
+- **`const modal`** - Modal element variable
+- **`if (modal)`** - Existence check
+- **`modal.remove()`** - DOM method to remove element
+- **`;`** - Statement terminator
+
+---
+
+## Status-Based Conditional Logic Syntax Components
+
+### Status Validation Check
+```javascript
+if (complaint.status === 'resolved' || complaint.status === 'closed') {
+    showError('Cannot edit resolved or closed complaints.');
+    return;
+}
+```
+- **`if`** - Conditional statement keyword
+- **`(`** - Condition start
+- **`complaint.status`** - Object property access
+- **`=== 'resolved'`** - Strict equality comparison
+- **`||`** - Logical OR operator
+- **`complaint.status === 'closed'`** - Second condition
+- **`)`** - Condition end
+- **`{`** - Block start
+- **`showError()`** - Function call
+- **`'Cannot edit resolved or closed complaints.'`** - String parameter
+- **`return;`** - Early function exit
+- **`}`** - Block end
+
+### Conditional Button Rendering in Template
+```javascript
+${task.status !== 'resolved' && task.status !== 'closed' ? `
+    <button class="edit-btn" onclick="editTask(${task.id})">Edit</button>
+` : ''}
+```
+- **`${}`** - Template literal expression
+- **`task.status !== 'resolved'`** - Not equal comparison
+- **`&&`** - Logical AND operator
+- **`task.status !== 'closed'`** - Second condition
+- **`?`** - Ternary operator (if)
+- **`` ` ``** - Template literal for HTML
+- **`<button class="edit-btn"`** - Button element with CSS class
+- **`onclick="editTask(${task.id})"`** - Dynamic onclick handler
+- **`${task.id}`** - Nested template literal for ID
+- **`:`** - Ternary operator separator (else)
+- **`''`** - Empty string (no HTML)
+
+### Status Text Formatting
+```javascript
+const statusText = task.status.replace('_', ' ').toUpperCase();
+```
+- **`const statusText`** - Variable declaration
+- **`task.status`** - Property access
+- **`.replace('_', ' ')`** - String replacement method
+- **`'_'`** - Search string (underscore)
+- **`' '`** - Replacement string (space)
+- **`.toUpperCase()`** - String method to convert to uppercase
+- **Method chaining** - Multiple methods called in sequence
+
+### String Capitalization
+```javascript
+const formattedStatus = complaint.status.charAt(0).toUpperCase() + complaint.status.slice(1);
+```
+- **`complaint.status.charAt(0)`** - Get first character
+- **`.toUpperCase()`** - Convert to uppercase
+- **`+`** - String concatenation operator
+- **`complaint.status.slice(1)`** - Get substring from index 1 to end
+- **`slice(1)`** - String method to extract portion
+
+---
+
+## Enhanced Error Prevention Syntax Components
+
+### Comprehensive Element Checking
+```javascript
+function resetForm() {
+    const form = document.getElementById('userForm');
+    if (form) {
+        form.reset();
+    }
+    
+    const createBtn = document.getElementById('createBtn');
+    const updateBtn = document.getElementById('updateBtn');
+    
+    if (createBtn) createBtn.style.display = 'inline-block';
+    if (updateBtn) updateBtn.style.display = 'none';
+}
+```
+- **`function resetForm()`** - Function declaration
+- **`const form`** - Element variable
+- **`document.getElementById('userForm')`** - DOM method
+- **`if (form)`** - Null check
+- **`form.reset()`** - Form method call
+- **`const createBtn`** - Button element variable
+- **`if (createBtn)`** - Inline conditional
+- **`createBtn.style.display`** - CSS property access
+- **`'inline-block'`** - CSS display value
+
+### Safe Filter Element Access Pattern
+```javascript
+const searchElement = document.getElementById('search-users');
+const roleElement = document.getElementById('role-filter');
+
+const searchTerm = searchElement ? searchElement.value.toLowerCase() : '';
+const roleFilter = roleElement ? roleElement.value : 'all';
+```
+- **`const searchElement`** - Element variable declaration
+- **`const roleElement`** - Second element variable
+- **`searchElement ?`** - Ternary condition check
+- **`searchElement.value.toLowerCase()`** - Property access and method call
+- **`: ''`** - Default empty string
+- **`roleElement.value`** - Property access
+- **`: 'all'`** - Default filter value
+
+### Runtime Error Prevention with Early Return
+```javascript
+function loadUploads(applyFilters = false) {
+    const uploadsList = document.getElementById('uploads-list');
+    if (!uploadsList) {
+        console.error('Uploads list element not found');
+        return;
+    }
+}
+```
+- **`function loadUploads(applyFilters = false)`** - Function with default parameter
+- **`= false`** - Default parameter value
+- **`const uploadsList`** - Element variable
+- **`if (!uploadsList)`** - Negative existence check
+- **`!`** - NOT operator
+- **`console.error()`** - Error logging method
+- **`'Uploads list element not found'`** - Error message string
+- **`return;`** - Early function exit
+
+### Safe Property Access in Filters
+```javascript
+if (searchTerm && filteredUploads) {
+    filteredUploads = filteredUploads.filter(upload => 
+        upload.title?.toLowerCase().includes(searchTerm) ||
+        upload.filename?.toLowerCase().includes(searchTerm)
+    );
+}
+```
+- **`if (searchTerm && filteredUploads)`** - Multiple condition check
+- **`&&`** - Logical AND operator
+- **`filteredUploads.filter()`** - Array filter method
+- **`upload =>`** - Arrow function parameter
+- **`upload.title?.toLowerCase()`** - Optional chaining with method call
+- **`?.`** - Optional chaining operator
+- **`.includes(searchTerm)`** - String search method
+- **`||`** - Logical OR between conditions
+
+---
+
+## Duplicate Validation Syntax Components
+
+### Server Response Message Checking
+```javascript
+if (result.message && result.message.includes('already exists')) {
+    showError(result.message);
+} else {
+    showError('Error: ' + (result.message || 'Unknown error'));
+}
+```
+- **`result.message`** - Response property access
+- **`&&`** - Logical AND operator
+- **`result.message.includes()`** - String method
+- **`'already exists'`** - Search substring
+- **`showError()`** - Custom error function
+- **`else`** - Alternative condition
+- **`'Error: ' +`** - String concatenation
+- **`(result.message || 'Unknown error')`** - Parentheses for grouping
+- **`||`** - Logical OR for fallback
+
+### HTTP Status Code Handling
+```javascript
+if (response.status === 409) {
+    const error = await response.json();
+    showError(error.message || 'Duplicate record detected');
+    return;
+}
+```
+- **`response.status`** - HTTP response property
+- **`=== 409`** - Strict equality for Conflict status
+- **`const error`** - Variable for error data
+- **`await response.json()`** - Async JSON parsing
+- **`error.message`** - Error object property
+- **`|| 'Duplicate record detected'`** - Fallback message
+
+### Try-Catch Error Handling
+```javascript
+try {
+    const result = await userCrud.create(data);
+    if (result.success) {
+        showSuccess('User created successfully!');
+    } else {
+        showError('Error: ' + result.message);
+    }
+} catch (error) {
+    console.error('Error creating user:', error);
+    showError('Network error occurred');
+}
+```
+- **`try`** - Try block keyword
+- **`{`** - Try block start
+- **`const result`** - Variable in try block
+- **`await userCrud.create(data)`** - Async operation
+- **`if (result.success)`** - Success condition check
+- **`}`** - Try block end
+- **`catch (error)`** - Catch block with error parameter
+- **`console.error()`** - Error logging
+- **`'Error creating user:', error`** - Multiple parameters
+
+---
+
+## Advanced Modal Management Syntax Components
+
+### Modal Backdrop Styling
+```javascript
+style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8);"
+```
+- **`style="..."`** - HTML style attribute
+- **`position: fixed;`** - CSS positioning property
+- **`top: 0;`** - CSS top position
+- **`left: 0;`** - CSS left position
+- **`width: 100%;`** - CSS width property
+- **`height: 100%;`** - CSS height property
+- **`background: rgba(0,0,0,0.8);`** - CSS background with transparency
+- **`rgba(0,0,0,0.8)`** - RGBA color function
+- **`0,0,0`** - RGB values (black)
+- **`0.8`** - Alpha transparency value
+
+### Flexbox Centering
+```javascript
+style="display: flex; align-items: center; justify-content: center;"
+```
+- **`display: flex;`** - CSS flexbox display
+- **`align-items: center;`** - Vertical centering
+- **`justify-content: center;`** - Horizontal centering
+
+### Modal Close Button Styling
+```javascript
+<button onclick="closeModal()" style="position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+```
+- **`onclick="closeModal()"`** - Inline event handler
+- **`position: absolute;`** - CSS absolute positioning
+- **`top: 10px;`** - Distance from top
+- **`right: 15px;`** - Distance from right
+- **`background: none;`** - No background
+- **`border: none;`** - No border
+- **`font-size: 24px;`** - Large font size
+- **`cursor: pointer;`** - Pointer cursor on hover
+- **`&times;`** - HTML entity for multiplication sign (×)
+
+### Modal Content Styling
+```javascript
+style="background: white; padding: 30px; border-radius: 10px; max-width: 80%; max-height: 80%; overflow: auto;"
+```
+- **`background: white;`** - White background
+- **`padding: 30px;`** - Internal spacing
+- **`border-radius: 10px;`** - Rounded corners
+- **`max-width: 80%;`** - Maximum width constraint
+- **`max-height: 80%;`** - Maximum height constraint
+- **`overflow: auto;`** - Scrolling when content overflows
+
+### Box Shadow Effect
+```javascript
+style="box-shadow: 0 10px 30px rgba(0,0,0,0.3);"
+```
+- **`box-shadow:`** - CSS shadow property
+- **`0`** - Horizontal offset
+- **`10px`** - Vertical offset
+- **`30px`** - Blur radius
+- **`rgba(0,0,0,0.3)`** - Shadow color with transparency
+
+### Element Removal
+```javascript
+const modal = document.getElementById('modal-id');
+if (modal) {
+    modal.remove();
+}
+```
+- **`const modal`** - Element variable
+- **`document.getElementById('modal-id')`** - Get element by ID
+- **`if (modal)`** - Existence check
+- **`modal.remove()`** - DOM method to remove element
+- **Automatic cleanup** - Removes element and associated event listeners
+
+This breakdown covers every syntax component used in your CPMS JavaScript and CSS files, including animation-related syntaxes, Laravel model validation integration, error prevention patterns, modal management, duplicate validation, enhanced filtering, professional form handling, file viewer modals with image preview capabilities, status-based conditional logic, comprehensive error prevention, and advanced modal management, explaining what each symbol, keyword, and operator does in the code.
 
