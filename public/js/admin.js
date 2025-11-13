@@ -11,6 +11,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('userForm');
     const createBtn = document.getElementById('createBtn');
     const updateBtn = document.getElementById('updateBtn');
+    
+    // Add null checks for buttons
+    if (updateBtn) {
+        updateBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            form.dispatchEvent(new Event('submit'));
+        });
+    }
     const loadUsersBtn = document.getElementById('loadUsersBtn');
     const loadUploadsBtn = document.getElementById('loadUploadsBtn');
     const loadTasksBtn = document.getElementById('loadTasksBtn');
@@ -74,7 +82,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 resetForm();
                 loadUsers();
             } else {
-                showError('Error: ' + (result.message || 'Unknown error'));
+                if (result.message && result.message.includes('already exists')) {
+                    showError(result.message);
+                } else {
+                    showError('Error: ' + (result.message || 'Unknown error'));
+                }
             }
         } catch (error) {
             console.error('Error:', error);
@@ -82,33 +94,90 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Update button click handler
-    updateBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        form.dispatchEvent(new Event('submit'));
-    });
+    // Update button click handler moved above with null check
 
     // Load data event listeners
     loadUsersBtn.addEventListener('click', loadUsers);
     loadUploadsBtn.addEventListener('click', loadUploads);
-    loadTasksBtn.addEventListener('click', loadTasks);
+    if (loadTasksBtn) {
+        loadTasksBtn.addEventListener('click', loadTasks);
+    }
     loadComplaintsBtn.addEventListener('click', loadComplaints);
+    
+    // Filter functionality with null checks
+    const applyUserFilters = document.getElementById('apply-user-filters');
+    const searchUsers = document.getElementById('search-users');
+    const applyFilters = document.getElementById('apply-filters');
+    const searchFiles = document.getElementById('search-files');
+    
+    if (applyUserFilters) {
+        applyUserFilters.addEventListener('click', () => loadUsers(true));
+    }
+    if (searchUsers) {
+        searchUsers.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') loadUsers(true);
+        });
+    }
+    if (applyFilters) {
+        applyFilters.addEventListener('click', () => loadUploads(true));
+    }
+    if (searchFiles) {
+        searchFiles.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') loadUploads(true);
+        });
+    }
 
     // Clear form
     clearBtn.addEventListener('click', resetForm);
 
-    async function loadUsers() {
+    async function loadUsers(applyFilters = false) {
         console.log('Loading users...');
         try {
             const users = await userCrud.readAll();
             console.log('Users loaded:', users);
             
-            if (users.length === 0) {
-                usersList.innerHTML = '<p class="no-users">No users found in the system.</p>';
+            let filteredUsers = users;
+            
+            // Apply search and filters
+            if (applyFilters) {
+                const searchElement = document.getElementById('search-users');
+                const roleElement = document.getElementById('filter-role');
+                const statusElement = document.getElementById('filter-status');
+                
+                const searchTerm = searchElement ? searchElement.value.toLowerCase() : '';
+                const roleFilter = roleElement ? roleElement.value : 'all';
+                const statusFilter = statusElement ? statusElement.value : 'all';
+                
+                if (searchTerm) {
+                    filteredUsers = filteredUsers.filter(user => 
+                        (user.name && user.name.toLowerCase().includes(searchTerm)) ||
+                        (user.email && user.email.toLowerCase().includes(searchTerm))
+                    );
+                }
+                
+                if (roleFilter !== 'all') {
+                    filteredUsers = filteredUsers.filter(user => user.user_type === roleFilter);
+                }
+                
+                if (statusFilter !== 'all') {
+                    if (statusFilter === 'active') {
+                        filteredUsers = filteredUsers.filter(user => user.is_active);
+                    } else if (statusFilter === 'inactive') {
+                        filteredUsers = filteredUsers.filter(user => !user.is_active);
+                    } else if (statusFilter === 'authorized') {
+                        filteredUsers = filteredUsers.filter(user => user.is_authorized);
+                    } else if (statusFilter === 'unauthorized') {
+                        filteredUsers = filteredUsers.filter(user => !user.is_authorized);
+                    }
+                }
+            }
+            
+            if (filteredUsers.length === 0) {
+                usersList.innerHTML = '<p class="no-users">No users found matching the criteria.</p>';
                 return;
             }
             
-            const usersHTML = users.map(user => `
+            const usersHTML = filteredUsers.map(user => `
                 <div class="user-item" data-id="${user.id}">
                     <div class="user-info">
                         <strong>${user.name}</strong> 
@@ -169,8 +238,8 @@ document.addEventListener('DOMContentLoaded', function() {
             currentEditingId = user.id;
             document.getElementById('user_id').value = user.id;
             
-            createBtn.style.display = 'none';
-            updateBtn.style.display = 'inline-block';
+            if (createBtn) createBtn.style.display = 'none';
+            if (updateBtn) updateBtn.style.display = 'inline-block';
         }
     };
 
@@ -254,8 +323,8 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('password').required = true;
         document.getElementById('password').placeholder = '';
         document.getElementById('is_active').checked = true;
-        createBtn.style.display = 'inline-block';
-        updateBtn.style.display = 'none';
+        if (createBtn) createBtn.style.display = 'inline-block';
+        if (updateBtn) updateBtn.style.display = 'none';
     }
 
     // Show edit users section
@@ -312,15 +381,37 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // Load uploads function
-    async function loadUploads() {
+    async function loadUploads(applyFilters = false) {
         const uploads = await uploadCrud.readAll();
         
-        if (uploads.length === 0) {
-            uploadsList.innerHTML = '<p class="no-uploads">No files found.</p>';
+        let filteredUploads = uploads;
+        
+        // Apply search and type filters
+        if (applyFilters) {
+            const searchElement = document.getElementById('search-files');
+            const typeElement = document.getElementById('filter-type');
+            
+            const searchTerm = searchElement ? searchElement.value.toLowerCase() : '';
+            const typeFilter = typeElement ? typeElement.value : 'all';
+            
+            if (searchTerm) {
+                filteredUploads = filteredUploads.filter(upload => 
+                    (upload.title && upload.title.toLowerCase().includes(searchTerm)) ||
+                    (upload.filename && upload.filename.toLowerCase().includes(searchTerm))
+                );
+            }
+            
+            if (typeFilter !== 'all') {
+                filteredUploads = filteredUploads.filter(upload => upload.upload_type === typeFilter);
+            }
+        }
+        
+        if (filteredUploads.length === 0) {
+            uploadsList.innerHTML = '<p class="no-uploads">No files found matching the criteria.</p>';
             return;
         }
         
-        const uploadsHTML = uploads.map(upload => `
+        const uploadsHTML = filteredUploads.map(upload => `
             <div class="upload-item" data-id="${upload.id}">
                 <div class="upload-info">
                     <div class="upload-title">${upload.title || upload.filename}</div>
@@ -343,34 +434,70 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Load tasks function
     async function loadTasks() {
-        const tasks = await taskCrud.readAll();
-        
-        if (tasks.length === 0) {
-            tasksList.innerHTML = '<p class="no-tasks">No tasks found.</p>';
-            return;
-        }
-        
-        const tasksHTML = tasks.map(task => `
-            <div class="task-item" data-id="${task.id}">
-                <div class="task-info">
-                    <div class="task-title">${task.title}</div>
-                    <div class="task-details">
-                        <span class="task-priority priority-${task.priority}">${task.priority.toUpperCase()}</span>
-                        <span class="task-status status-${task.status}">${task.status.replace('_', ' ').toUpperCase()}</span>
-                        <span class="task-date">${new Date(task.created_at).toLocaleDateString()}</span>
-                        <span class="task-worker">Staff: ${task.worker_id}</span>
-                        <span class="task-foreman">Foreman: ${task.foreman_id}</span>
+        console.log('Loading tasks...');
+        try {
+            console.log('Making request to /crud/tasks');
+            const response = await fetch('/crud/tasks', {
+                method: 'GET',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]')?.value || '',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            });
+            
+            console.log('Response status:', response.status);
+            const result = await response.json();
+            console.log('Response data:', result);
+            
+            if (!tasksList) {
+                console.error('Tasks list element not found');
+                return;
+            }
+            
+            if (!result.success) {
+                console.error('API error:', result.message);
+                tasksList.innerHTML = `<p class="no-tasks">Error: ${result.message}</p>`;
+                return;
+            }
+            
+            const tasks = result.data || [];
+            console.log('Tasks array:', tasks, 'Length:', tasks.length);
+            
+            if (!tasks || tasks.length === 0) {
+                tasksList.innerHTML = '<p class="no-tasks">No tasks found in database.</p>';
+                return;
+            }
+            
+            const tasksHTML = tasks.map(task => `
+                <div class="task-item" data-id="${task.id}">
+                    <div class="task-info">
+                        <div class="task-title">${task.title || 'Untitled Task'}</div>
+                        <div class="task-details">
+                            <span class="task-priority priority-${task.priority || 'medium'}">${(task.priority || 'medium').toUpperCase()}</span>
+                            <span class="task-status status-${task.status || 'pending'}">${(task.status || 'pending').replace('_', ' ').toUpperCase()}</span>
+                            <span class="task-date">${task.created_at ? new Date(task.created_at).toLocaleDateString() : 'No date'}</span>
+                            <span class="task-worker">Staff: ${task.worker_id || 'Unassigned'}</span>
+                            <span class="task-foreman">Foreman: ${task.foreman_id || 'Unassigned'}</span>
+                            ${task.due_date ? `<span class="task-due">Due: ${new Date(task.due_date).toLocaleDateString()}</span>` : ''}
+                        </div>
+                        <div class="task-description">${task.description || 'No description'}</div>
+                        ${task.foreman_notes ? `<div class="task-notes">Notes: ${task.foreman_notes}</div>` : ''}
                     </div>
-                    <div class="task-description">${task.description}</div>
+                    <div class="task-actions">
+                        <button class="view-btn" onclick="viewTask(${task.id})">View</button>
+                        <button class="delete-btn" onclick="deleteTask(${task.id})">Delete</button>
+                    </div>
                 </div>
-                <div class="task-actions">
-                    <button class="view-btn" onclick="viewTask(${task.id})">View</button>
-                    <button class="delete-btn" onclick="deleteTask(${task.id})">Delete</button>
-                </div>
-            </div>
-        `).join('');
-        
-        tasksList.innerHTML = tasksHTML;
+            `).join('');
+            
+            tasksList.innerHTML = tasksHTML;
+        } catch (error) {
+            console.error('Error loading tasks:', error);
+            if (tasksList) {
+                tasksList.innerHTML = '<p class="no-tasks">Error loading tasks. Check console for details.</p>';
+            }
+        }
     }
 
     // Load complaints function
@@ -414,10 +541,21 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     window.viewTask = async function(id) {
-        const result = await taskCrud.readOne(id);
-        if (result.success) {
-            const task = result.data;
-            showInfo(`Task Details:\n\nTitle: ${task.title}\nDescription: ${task.description}\nPriority: ${task.priority}\nStatus: ${task.status}\nStaff ID: ${task.worker_id}\nForeman ID: ${task.foreman_id}\nCreated: ${new Date(task.created_at).toLocaleString()}`);
+        try {
+            const result = await taskCrud.readOne(id);
+            if (result.success) {
+                const task = result.data;
+                const dueDate = task.due_date ? `\nDue Date: ${new Date(task.due_date).toLocaleDateString()}` : '';
+                const completedAt = task.completed_at ? `\nCompleted: ${new Date(task.completed_at).toLocaleString()}` : '';
+                const notes = task.foreman_notes ? `\nForeman Notes: ${task.foreman_notes}` : '';
+                
+                showInfo(`Task Details:\n\nTitle: ${task.title || 'Untitled'}\nDescription: ${task.description || 'No description'}\nPriority: ${(task.priority || 'medium').toUpperCase()}\nStatus: ${(task.status || 'pending').toUpperCase()}\nStaff ID: ${task.worker_id || 'Unassigned'}\nForeman ID: ${task.foreman_id || 'Unassigned'}${dueDate}${completedAt}${notes}\nCreated: ${task.created_at ? new Date(task.created_at).toLocaleString() : 'Unknown'}`);
+            } else {
+                showError('Error loading task details: ' + (result.message || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error viewing task:', error);
+            showError('Error loading task details');
         }
     };
 
@@ -444,12 +582,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.deleteTask = async function(id) {
         showConfirmPopup('Delete Task', 'Are you sure you want to delete this task?', async function() {
-            const result = await taskCrud.delete(id);
-            if (result.success) {
-                showSuccess('Task deleted successfully!');
-                loadTasks();
-            } else {
-                showError('Error: ' + (result.message || 'Unknown error'));
+            try {
+                const result = await taskCrud.delete(id);
+                if (result.success) {
+                    showSuccess('Task deleted successfully!');
+                    loadTasks();
+                } else {
+                    showError('Error: ' + (result.message || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error deleting task:', error);
+                showError('Error deleting task');
             }
         });
     };
@@ -500,6 +643,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Load users on page load
     loadUsers();
+    
+    // Debug: Test task loading on page load
+    console.log('Testing task loading on page load...');
+    setTimeout(() => {
+        if (tasksList) {
+            console.log('Tasks list element found, testing load...');
+            loadTasks();
+        } else {
+            console.log('Tasks list element not found on page load');
+        }
+    }, 1000);
 });
 
 // Logout function

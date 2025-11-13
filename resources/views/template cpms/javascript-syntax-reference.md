@@ -1197,4 +1197,365 @@ const successResponse = {
 };
 ```
 
-This reference covers all the JavaScript syntaxes and patterns used throughout the CPMS project, including animation-related syntaxes and Laravel model validation integration. Each syntax includes its purpose, proper usage, and real examples from the codebase.
+### Error Prevention and Null Check Patterns
+
+#### Null Check Pattern
+**Description:** Safely check if elements exist before accessing them
+**Syntax:** `const element = document.getElementById('id'); if (element) { /* use element */ }`
+**Example:**
+```javascript
+const createBtn = document.getElementById('createBtn');
+if (createBtn) {
+    createBtn.style.display = 'none';
+}
+
+const updateBtn = document.getElementById('updateBtn');
+if (updateBtn) {
+    updateBtn.style.display = 'inline-block';
+}
+```
+
+#### Safe Element Access with Optional Chaining
+**Description:** Use optional chaining to prevent runtime errors
+**Syntax:** `element?.property` or `element?.method()`
+**Example:**
+```javascript
+const csrfToken = document.querySelector('input[name="_token"]')?.value;
+const searchInput = document.getElementById('search-users');
+searchInput?.addEventListener('keyup', function(e) {
+    if (e.key === 'Enter') loadUsers(true);
+});
+```
+
+#### Filter Element Safety Pattern
+**Description:** Check filter elements exist before adding event listeners
+**Syntax:** `if (filterElement) { filterElement.addEventListener(...) }`
+**Example:**
+```javascript
+const applyUserFiltersBtn = document.getElementById('apply-user-filters');
+if (applyUserFiltersBtn) {
+    applyUserFiltersBtn.addEventListener('click', function() {
+        loadUsers(true);
+    });
+}
+
+const searchUsersInput = document.getElementById('search-users');
+if (searchUsersInput) {
+    searchUsersInput.addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') loadUsers(true);
+    });
+}
+```
+
+#### Safe DOM Manipulation Pattern
+**Description:** Check elements exist before manipulating them
+**Syntax:** `if (element) { /* manipulate element */ }`
+**Example:**
+```javascript
+function resetForm() {
+    const form = document.getElementById('userForm');
+    if (form) {
+        form.reset();
+    }
+    
+    const createBtn = document.getElementById('createBtn');
+    const updateBtn = document.getElementById('updateBtn');
+    
+    if (createBtn) createBtn.style.display = 'inline-block';
+    if (updateBtn) updateBtn.style.display = 'none';
+    
+    currentEditingId = null;
+}
+```
+
+#### Filter Logic Safety Pattern
+**Description:** Safely access filter values with fallbacks
+**Syntax:** `const value = element?.value || defaultValue;`
+**Example:**
+```javascript
+function loadUsers(applyFilters = false) {
+    let filteredUsers = [...users];
+    
+    if (applyFilters) {
+        const searchTerm = document.getElementById('search-users')?.value?.toLowerCase() || '';
+        const roleFilter = document.getElementById('role-filter')?.value || 'all';
+        const statusFilter = document.getElementById('status-filter')?.value || 'all';
+        
+        if (searchTerm) {
+            filteredUsers = filteredUsers.filter(user => 
+                (user.name?.toLowerCase().includes(searchTerm)) ||
+                (user.email?.toLowerCase().includes(searchTerm))
+            );
+        }
+    }
+}
+```
+
+#### Runtime Error Prevention Pattern
+**Description:** Comprehensive error checking before operations
+**Syntax:** Multiple null checks and safe operations
+**Example:**
+```javascript
+function loadUploads(applyFilters = false) {
+    const uploadsList = document.getElementById('uploads-list');
+    if (!uploadsList) {
+        console.error('Uploads list element not found');
+        return;
+    }
+    
+    let filteredUploads = [...uploads];
+    
+    if (applyFilters) {
+        const searchInput = document.getElementById('search-files');
+        const typeFilter = document.getElementById('type-filter');
+        const statusFilter = document.getElementById('status-filter');
+        
+        const searchTerm = searchInput?.value?.toLowerCase() || '';
+        const typeValue = typeFilter?.value || 'all';
+        const statusValue = statusFilter?.value || 'all';
+        
+        // Apply filters safely
+        if (searchTerm && filteredUploads) {
+            filteredUploads = filteredUploads.filter(upload => 
+                upload.title?.toLowerCase().includes(searchTerm) ||
+                upload.filename?.toLowerCase().includes(searchTerm)
+            );
+        }
+    }
+}
+```
+
+### Modal Creation and Management
+
+#### document.body.insertAdjacentHTML()
+**Description:** Inserts HTML at specified position relative to element
+**Syntax:** `element.insertAdjacentHTML(position, htmlString);`
+**Example:**
+```javascript
+const modalHTML = `<div id="edit-complaint-modal">...</div>`;
+document.body.insertAdjacentHTML('beforeend', modalHTML);
+```
+
+#### Modal Styling with Inline CSS
+**Description:** Creating styled modals with JavaScript template literals
+**Syntax:** `` `<div style="property: value;">content</div>` ``
+**Example:**
+```javascript
+const modalHTML = `
+    <div style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        z-index: 10000;
+    ">
+        <div style="background: white; padding: 30px;">Content</div>
+    </div>
+`;
+```
+
+#### Modal Event Handling
+**Description:** Adding event listeners to dynamically created modal elements
+**Syntax:** `document.getElementById('modal-form').addEventListener('event', handler);`
+**Example:**
+```javascript
+document.getElementById('edit-complaint-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    // Handle form submission
+});
+```
+
+#### Modal Cleanup
+**Description:** Removing modals from DOM after use
+**Syntax:** `element.remove();`
+**Example:**
+```javascript
+window.closeEditModal = function() {
+    const modal = document.getElementById('edit-complaint-modal');
+    if (modal) {
+        modal.remove();
+    }
+};
+```
+
+### Duplicate Validation Patterns
+
+#### Server Response Validation
+**Description:** Checking server responses for duplicate validation errors
+**Syntax:** `if (result.message && result.message.includes('already exists')) { }`
+**Example:**
+```javascript
+if (result.success) {
+    showSuccess('Record created successfully!');
+} else {
+    if (result.message && result.message.includes('already exists')) {
+        showError(result.message);
+    } else {
+        showError('Error: ' + (result.message || 'Unknown error'));
+    }
+}
+```
+
+#### HTTP Status Code Handling
+**Description:** Handling 409 Conflict status for duplicate records
+**Syntax:** `response.status === 409`
+**Example:**
+```javascript
+if (response.status === 409) {
+    const error = await response.json();
+    showError(error.message);
+}
+```
+
+### Enhanced Search and Filter Patterns
+
+#### Multi-Field Search
+**Description:** Searching across multiple object properties
+**Syntax:** `array.filter(item => condition1 || condition2 || condition3)`
+**Example:**
+```javascript
+filteredTasks = tasks.filter(task => 
+    (task.title && task.title.toLowerCase().includes(searchTerm)) ||
+    (task.description && task.description.toLowerCase().includes(searchTerm)) ||
+    (task.staff_name && task.staff_name.toLowerCase().includes(searchTerm))
+);
+```
+
+#### Combined Filter Logic
+**Description:** Applying multiple filters sequentially
+**Syntax:** `let filtered = data; if (condition1) filtered = filtered.filter(...); if (condition2) filtered = filtered.filter(...);`
+**Example:**
+```javascript
+let filteredTasks = tasks;
+
+if (searchTerm) {
+    filteredTasks = filteredTasks.filter(task => 
+        task.title.toLowerCase().includes(searchTerm)
+    );
+}
+
+if (priorityFilter !== 'all') {
+    filteredTasks = filteredTasks.filter(task => task.priority === priorityFilter);
+}
+
+if (statusFilter !== 'all') {
+    filteredTasks = filteredTasks.filter(task => task.status === statusFilter);
+}
+```
+
+#### Filter Element Safety
+**Description:** Safe access to filter form elements
+**Syntax:** `const value = element ? element.value : 'default';`
+**Example:**
+```javascript
+const searchElement = document.getElementById('search-tasks');
+const priorityElement = document.getElementById('filter-priority');
+const statusElement = document.getElementById('filter-status');
+
+const searchTerm = searchElement ? searchElement.value.toLowerCase() : '';
+const priorityFilter = priorityElement ? priorityElement.value : 'all';
+const statusFilter = statusElement ? statusElement.value : 'all';
+```
+
+### Professional Form Handling
+
+#### Pre-filled Form Values
+**Description:** Setting form values from existing data
+**Syntax:** `input.value = data.property;`
+**Example:**
+```javascript
+document.getElementById('edit-title').value = complaint.title;
+document.getElementById('edit-description').value = complaint.description;
+
+// For select elements
+const prioritySelect = document.getElementById('edit-priority');
+prioritySelect.value = complaint.priority;
+```
+
+#### Dynamic Option Selection
+**Description:** Setting selected option based on data
+**Syntax:** `<option value="val" ${condition ? 'selected' : ''}>Label</option>`
+**Example:**
+```javascript
+const selectHTML = `
+    <select id="edit-priority">
+        <option value="low" ${complaint.priority === 'low' ? 'selected' : ''}>Low</option>
+        <option value="medium" ${complaint.priority === 'medium' ? 'selected' : ''}>Medium</option>
+        <option value="high" ${complaint.priority === 'high' ? 'selected' : ''}>High</option>
+        <option value="urgent" ${complaint.priority === 'urgent' ? 'selected' : ''}>Urgent</option>
+    </select>
+`;
+```
+
+#### Form Data Extraction
+**Description:** Getting values from form elements in modals
+**Syntax:** `const data = { field: document.getElementById('field').value };`
+**Example:**
+```javascript
+const updateData = {
+    title: document.getElementById('edit-title').value,
+    description: document.getElementById('edit-description').value,
+    priority: document.getElementById('edit-priority').value
+};
+```
+
+### Advanced Event Handling
+
+#### Outside Click Detection
+**Description:** Closing modals when clicking outside them
+**Syntax:** `if (modal && e.target === modal) { closeModal(); }`
+**Example:**
+```javascript
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('edit-complaint-modal');
+    if (modal && e.target === modal) {
+        closeEditModal();
+    }
+});
+```
+
+#### Conditional Button Display
+**Description:** Showing/hiding buttons based on data state
+**Syntax:** `${condition ? 'html' : ''}`
+**Example:**
+```javascript
+const actionsHTML = `
+    <div class="task-actions">
+        ${task.status !== 'resolved' && task.status !== 'closed' ? `
+            <button class="edit-btn" onclick="editTask(${task.id})">Edit</button>
+        ` : ''}
+        ${task.status === 'resolved' ? `
+            <button class="delete-btn" onclick="deleteTask(${task.id})">Delete</button>
+        ` : ''}
+    </div>
+`;
+```
+
+### Status-Based Logic
+
+#### Status Validation
+**Description:** Checking record status before allowing operations
+**Syntax:** `if (record.status === 'target_status') { /* allow operation */ }`
+**Example:**
+```javascript
+if (complaint.status === 'resolved' || complaint.status === 'closed') {
+    alert('Cannot edit resolved or closed complaints.');
+    return;
+}
+
+// Allow editing for open complaints
+showEditComplaintModal(complaint);
+```
+
+#### Dynamic Status Display
+**Description:** Formatting status text for display
+**Syntax:** `status.replace('_', ' ').toUpperCase()`
+**Example:**
+```javascript
+const statusText = task.status.replace('_', ' ').toUpperCase();
+// 'in_progress' becomes 'IN PROGRESS'
+```
+
+This reference covers all the JavaScript syntaxes and patterns used throughout the CPMS project, including animation-related syntaxes, Laravel model validation integration, error prevention patterns, modal management, duplicate validation, enhanced filtering, and professional form handling. Each syntax includes its purpose, proper usage, and real examples from the codebase.

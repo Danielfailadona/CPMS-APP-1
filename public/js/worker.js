@@ -60,7 +60,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 resetTaskForm();
                 loadTasks();
             } else {
-                alert('Error: ' + (result.message || 'Unknown error'));
+                if (result.message && result.message.includes('already exists')) {
+                    alert(result.message);
+                } else {
+                    alert('Error: ' + (result.message || 'Unknown error'));
+                }
             }
         } catch (error) {
             console.error('Error:', error);
@@ -125,7 +129,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 resetForm();
                 loadUploads();
             } else {
-                alert('Error saving file info: ' + (result.message || 'Unknown error'));
+                if (result.message && result.message.includes('already exists')) {
+                    alert(result.message);
+                } else {
+                    alert('Error saving file info: ' + (result.message || 'Unknown error'));
+                }
             }
         } catch (error) {
             console.error('Error:', error);
@@ -180,7 +188,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const uploads = await uploadCrud.readAll();
             const currentUserId = await getCurrentUserId();
             
+            console.log('All uploads:', uploads);
+            console.log('Current user ID:', currentUserId);
+            
             let userUploads = uploads.filter(upload => upload.user_id == currentUserId);
+            
+            console.log('User uploads:', userUploads);
             
             // Apply search and type filters
             if (applyFilters) {
@@ -200,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             if (userUploads.length === 0) {
-                uploadsList.innerHTML = '<p class="no-uploads">No files uploaded yet.</p>';
+                uploadsList.innerHTML = '<p class="no-uploads">No files uploaded yet for your account.</p>';
                 return;
             }
             
@@ -358,8 +371,98 @@ document.addEventListener('DOMContentLoaded', function() {
             const upload = result.data;
             const publicStatus = upload.is_public ? 'Public' : 'Private';
             
-            alert(`File Details:\n\nTitle: ${upload.title}\nFilename: ${upload.filename}\nType: ${getUploadTypeLabel(upload.upload_type)}\nSize: ${upload.file_size}\nPublic: ${publicStatus}\nUploaded: ${new Date(upload.created_at).toLocaleString()}\nDescription: ${upload.description || 'None'}`);
+            // Create modal HTML
+            const modalHTML = `
+                <div id="file-viewer-modal" style="
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0,0,0,0.8);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 10000;
+                ">
+                    <div style="
+                        background: white;
+                        padding: 20px;
+                        border-radius: 10px;
+                        max-width: 80%;
+                        max-height: 80%;
+                        overflow-y: auto;
+                        position: relative;
+                    ">
+                        <button onclick="closeFileViewer()" style="
+                            position: absolute;
+                            top: 10px;
+                            right: 15px;
+                            background: none;
+                            border: none;
+                            font-size: 24px;
+                            cursor: pointer;
+                            color: #666;
+                        ">×</button>
+                        
+                        <h3 style="margin-top: 0; color: rgb(244, 123, 32);">${upload.title || upload.filename}</h3>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <strong>Type:</strong> ${getUploadTypeLabel(upload.upload_type)}<br>
+                            <strong>Size:</strong> ${upload.file_size}<br>
+                            <strong>Status:</strong> ${publicStatus}<br>
+                            <strong>Uploaded:</strong> ${new Date(upload.created_at).toLocaleString()}
+                        </div>
+                        
+                        ${upload.description ? `
+                            <div style="margin-bottom: 15px;">
+                                <strong>Description:</strong><br>
+                                <p style="background: #f5f5f5; padding: 10px; border-radius: 5px;">${upload.description}</p>
+                            </div>
+                        ` : ''}
+                        
+                        <div id="file-content" style="text-align: center;">
+                            ${upload.mime_type && upload.mime_type.startsWith('image/') ? `
+                                <img src="/download-file?path=${encodeURIComponent(upload.file_path)}&filename=${encodeURIComponent(upload.filename)}" 
+                                     style="max-width: 100%; max-height: 400px; border-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" 
+                                     alt="${upload.filename}">
+                            ` : `
+                                <div style="padding: 20px; background: #f0f0f0; border-radius: 5px; margin: 10px 0;">
+                                    <p><strong>File:</strong> ${upload.filename}</p>
+                                    <p>This file type cannot be previewed. Click download to view the file.</p>
+                                    <button onclick="downloadFile('${upload.file_path}', '${upload.filename}')" 
+                                            style="background: rgb(244, 123, 32); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                                        Download File
+                                    </button>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add modal to page
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
         }
+    };
+    
+    // Close file viewer modal
+    window.closeFileViewer = function() {
+        const modal = document.getElementById('file-viewer-modal');
+        if (modal) {
+            modal.remove();
+        }
+    };
+    
+    // Download file from modal
+    window.downloadFile = function(filePath, filename) {
+        const url = `/download-file?path=${encodeURIComponent(filePath)}&filename=${encodeURIComponent(filename)}`;
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
     };
 
     window.deleteUpload = async function(id) {
@@ -499,7 +602,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     alert('Task updated successfully!');
                     loadTasks();
                 } else {
-                    alert('Error: ' + (updateResult.message || 'Unknown error'));
+                    if (updateResult.message && updateResult.message.includes('already exists')) {
+                        alert(updateResult.message);
+                    } else {
+                        alert('Error: ' + (updateResult.message || 'Unknown error'));
+                    }
                 }
             }
         } catch (error) {
@@ -557,6 +664,8 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('files-section').style.display = 'block';
             event.target.classList.add('active');
             loadUploads();
+            // Also trigger the refresh button click to ensure data loads
+            document.getElementById('loadUploadsBtn').click();
         } else if (section === 'upload') {
             document.getElementById('upload-section').style.display = 'block';
             event.target.classList.add('active');
@@ -712,7 +821,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('camera-upload-form').reset();
                 loadUploads();
             } else {
-                alert('Error saving photo info: ' + (result.message || 'Unknown error'));
+                if (result.message && result.message.includes('already exists')) {
+                    alert(result.message);
+                } else {
+                    alert('Error saving photo info: ' + (result.message || 'Unknown error'));
+                }
             }
             
         } catch (error) {

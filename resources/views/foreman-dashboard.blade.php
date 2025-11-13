@@ -39,6 +39,24 @@
                     <h3>Tasks from Staff</h3>
                     <button type="button" id="loadTasksBtn" class="action-btn">Refresh Tasks</button>
                 </div>
+                <div class="task-filters" style="margin-bottom: 15px;">
+                    <input type="text" id="search-tasks" placeholder="Search tasks by title or description..." style="padding: 8px; margin-right: 10px; width: 200px;">
+                    <select id="filter-priority" style="padding: 8px; margin-right: 10px;">
+                        <option value="all">All Priorities</option>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                        <option value="urgent">Urgent</option>
+                    </select>
+                    <select id="filter-status" style="padding: 8px; margin-right: 10px;">
+                        <option value="all">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                    <button type="button" id="apply-task-filters" class="action-btn">Apply Filters</button>
+                </div>
                 <div id="tasks-list" class="tasks-list"></div>
             </div>
 
@@ -60,6 +78,11 @@
                         <option value="safety">Safety</option>
                         <option value="inspection">Inspection</option>
                         <option value="other">Other</option>
+                    </select>
+                    <select id="filter-status" style="padding: 8px; margin-right: 10px;">
+                        <option value="all">All Status</option>
+                        <option value="public">Public</option>
+                        <option value="private">Private</option>
                     </select>
                     <button type="button" id="apply-filters" class="action-btn">Apply Filters</button>
                 </div>

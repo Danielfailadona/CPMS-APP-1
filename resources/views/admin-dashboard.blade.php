@@ -25,7 +25,6 @@
                     <div class="dropdown-menu" id="userDropdown">
                         <a href="#" onclick="showAddUser()">Create</a>
                         <a href="#" onclick="showEditUsers()">Update</a>
-                        <a href="#" onclick="showDeleteUsers()">Delete</a>
                     </div>
                 </li>
                 <li><a href="#" onclick="showSection('uploads')" class="btn">Files</a></li>
@@ -45,6 +44,26 @@
                 <div class="section-header">
                     <h3>Select User to Edit</h3>
                     <button type="button" id="loadUsersBtn" class="action-btn">Refresh Users</button>
+                </div>
+                <div class="file-filters" style="margin-bottom: 15px;">
+                    <input type="text" id="search-users" placeholder="Search users by name or email..." style="padding: 8px; margin-right: 10px; width: 200px;">
+                    <select id="filter-role" style="padding: 8px; margin-right: 10px;">
+                        <option value="all">All Roles</option>
+                        <option value="admin">Admin</option>
+                        <option value="client">Client</option>
+                        <option value="staff">Staff</option>
+                        <option value="foreman">Foreman</option>
+                        <option value="manager">Manager</option>
+                        <option value="ceo">CEO</option>
+                    </select>
+                    <select id="filter-status" style="padding: 8px; margin-right: 10px;">
+                        <option value="all">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="authorized">Authorized</option>
+                        <option value="unauthorized">Unauthorized</option>
+                    </select>
+                    <button type="button" id="apply-user-filters" class="action-btn">Apply Filters</button>
                 </div>
                 <div id="users-list" class="users-list"></div>
             </div>
@@ -290,6 +309,21 @@
                     <h3>All Files</h3>
                     <button type="button" id="loadUploadsBtn" class="action-btn">Refresh Files</button>
                 </div>
+                <div class="file-filters" style="margin-bottom: 15px;">
+                    <input type="text" id="search-files" placeholder="Search files by name..." style="padding: 8px; margin-right: 10px; width: 200px;">
+                    <select id="filter-type" style="padding: 8px; margin-right: 10px;">
+                        <option value="all">All Types</option>
+                        <option value="task">Task Related</option>
+                        <option value="image">Images</option>
+                        <option value="report">Reports</option>
+                        <option value="document">Documents</option>
+                        <option value="blueprint">Blueprints</option>
+                        <option value="safety">Safety</option>
+                        <option value="inspection">Inspection</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <button type="button" id="apply-filters" class="action-btn">Apply Filters</button>
+                </div>
                 <div id="uploads-list" class="uploads-list"></div>
             </div>
 
@@ -387,13 +421,7 @@
         dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
     }
     
-    function showDeleteUsers() {
-        document.querySelectorAll('.section').forEach(section => {
-            section.style.display = 'none';
-        });
-        document.getElementById('users-section').style.display = 'block';
-        document.getElementById('loadUsersBtn').click();
-    }
+
     
     function showAddUser() {
         document.querySelectorAll('.section').forEach(section => {

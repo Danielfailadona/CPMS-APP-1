@@ -40,7 +40,7 @@
                     <input type="text" id="search-files" placeholder="Search files by name..." style="padding: 8px; margin-right: 10px; width: 200px;">
                     <select id="filter-type" style="padding: 8px; margin-right: 10px;">
                         <option value="all">All Types</option>
-                        <option value="report">Reports</option>
+                        <option value="report">Management Reports</option>
                         <option value="task">Task Related</option>
                         <option value="image">Images</option>
                         <option value="document">Documents</option>

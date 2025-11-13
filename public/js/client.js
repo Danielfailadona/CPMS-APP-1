@@ -49,7 +49,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 resetComplaintForm();
                 loadComplaints();
             } else {
-                alert('Error: ' + (result.message || 'Unknown error'));
+                if (result.message && result.message.includes('already exists')) {
+                    alert(result.message);
+                } else {
+                    alert('Error: ' + (result.message || 'Unknown error'));
+                }
             }
         } catch (error) {
             console.error('Error:', error);
@@ -87,6 +91,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         ${complaint.worker_notes ? `<div class="staff-notes"><strong>Staff Notes:</strong> ${complaint.worker_notes}</div>` : ''}
                     </div>
                     <div class="complaint-actions">
+                        ${complaint.status !== 'resolved' && complaint.status !== 'closed' ? `
+                            <button class="edit-btn" onclick="editComplaint(${complaint.id})">Edit</button>
+                        ` : ''}
                         ${complaint.status === 'resolved' ? `<button class="delete-btn" onclick="deleteComplaint(${complaint.id})">Delete (Satisfied)</button>` : ''}
                     </div>
                 </div>
@@ -152,6 +159,169 @@ document.addEventListener('DOMContentLoaded', function() {
             uploadsList.innerHTML = '<p class="no-uploads">Error loading files.</p>';
         }
     }
+
+    // Edit complaint (only if not resolved/closed)
+    window.editComplaint = async function(id) {
+        try {
+            const result = await complaintCrud.readOne(id);
+            
+            if (result.success) {
+                const complaint = result.data;
+                
+                // Check if complaint can be edited
+                if (complaint.status === 'resolved' || complaint.status === 'closed') {
+                    alert('Cannot edit resolved or closed complaints.');
+                    return;
+                }
+                
+                showEditComplaintModal(complaint);
+            }
+        } catch (error) {
+            console.error('Error loading complaint:', error);
+            alert('Error loading complaint: ' + error.message);
+        }
+    };
+    
+    // Show edit complaint modal
+    function showEditComplaintModal(complaint) {
+        const modalHTML = `
+            <div id="edit-complaint-modal" style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+            ">
+                <div style="
+                    background: white;
+                    padding: 30px;
+                    border-radius: 10px;
+                    width: 90%;
+                    max-width: 500px;
+                    position: relative;
+                ">
+                    <button onclick="closeEditModal()" style="
+                        position: absolute;
+                        top: 15px;
+                        right: 20px;
+                        background: none;
+                        border: none;
+                        font-size: 24px;
+                        cursor: pointer;
+                        color: #666;
+                    ">×</button>
+                    
+                    <h3 style="margin-top: 0; color: rgb(244, 123, 32);">Edit Complaint</h3>
+                    
+                    <form id="edit-complaint-form">
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Title:</label>
+                            <input type="text" id="edit-title" value="${complaint.title}" style="
+                                width: 100%;
+                                padding: 10px;
+                                border: 1px solid #ddd;
+                                border-radius: 5px;
+                                font-size: 14px;
+                            " required>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Priority:</label>
+                            <select id="edit-priority" style="
+                                width: 100%;
+                                padding: 10px;
+                                border: 1px solid #ddd;
+                                border-radius: 5px;
+                                font-size: 14px;
+                            ">
+                                <option value="low" ${complaint.priority === 'low' ? 'selected' : ''}>Low</option>
+                                <option value="medium" ${complaint.priority === 'medium' ? 'selected' : ''}>Medium</option>
+                                <option value="high" ${complaint.priority === 'high' ? 'selected' : ''}>High</option>
+                                <option value="urgent" ${complaint.priority === 'urgent' ? 'selected' : ''}>Urgent</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Description:</label>
+                            <textarea id="edit-description" rows="4" style="
+                                width: 100%;
+                                padding: 10px;
+                                border: 1px solid #ddd;
+                                border-radius: 5px;
+                                font-size: 14px;
+                                resize: vertical;
+                            " required>${complaint.description}</textarea>
+                        </div>
+                        
+                        <div style="text-align: right;">
+                            <button type="button" onclick="closeEditModal()" style="
+                                background: #6c757d;
+                                color: white;
+                                border: none;
+                                padding: 10px 20px;
+                                border-radius: 5px;
+                                cursor: pointer;
+                                margin-right: 10px;
+                            ">Cancel</button>
+                            <button type="submit" style="
+                                background: rgb(244, 123, 32);
+                                color: white;
+                                border: none;
+                                padding: 10px 20px;
+                                border-radius: 5px;
+                                cursor: pointer;
+                            ">Update Complaint</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        
+        // Handle form submission
+        document.getElementById('edit-complaint-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const updateData = {
+                title: document.getElementById('edit-title').value,
+                description: document.getElementById('edit-description').value,
+                priority: document.getElementById('edit-priority').value
+            };
+            
+            try {
+                const updateResult = await complaintCrud.update(complaint.id, updateData);
+                
+                if (updateResult.success) {
+                    alert('Complaint updated successfully!');
+                    closeEditModal();
+                    loadComplaints();
+                } else {
+                    if (updateResult.message && updateResult.message.includes('already exists')) {
+                        alert(updateResult.message);
+                    } else {
+                        alert('Error: ' + (updateResult.message || 'Unknown error'));
+                    }
+                }
+            } catch (error) {
+                console.error('Error updating complaint:', error);
+                alert('Error updating complaint: ' + error.message);
+            }
+        });
+    }
+    
+    // Close edit modal
+    window.closeEditModal = function() {
+        const modal = document.getElementById('edit-complaint-modal');
+        if (modal) {
+            modal.remove();
+        }
+    };
 
     // Delete complaint (when client is satisfied)
     window.deleteComplaint = async function(id) {
@@ -286,6 +456,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
+    // Close modal when clicking outside
+    document.addEventListener('click', function(e) {
+        const modal = document.getElementById('edit-complaint-modal');
+        if (modal && e.target === modal) {
+            closeEditModal();
+        }
+    });
+    
     // Load data on page load
     loadComplaints();
 });

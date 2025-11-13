@@ -17,7 +17,20 @@ document.addEventListener('DOMContentLoaded', function() {
     loadUploadsBtn.addEventListener('click', loadUploads);
     document.getElementById('loadAllFilesBtn').addEventListener('click', loadAllFiles);
     
-    // Filter functionality
+    // Task filter functionality
+    const applyTaskFilters = document.getElementById('apply-task-filters');
+    const searchTasks = document.getElementById('search-tasks');
+    
+    if (applyTaskFilters) {
+        applyTaskFilters.addEventListener('click', () => loadTasks(true));
+    }
+    if (searchTasks) {
+        searchTasks.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') loadTasks(true);
+        });
+    }
+    
+    // File filter functionality
     document.getElementById('apply-filters').addEventListener('click', () => loadUploads(true));
     document.getElementById('apply-all-filters').addEventListener('click', () => loadAllFiles(true));
     document.getElementById('search-files').addEventListener('keyup', function(e) {
@@ -88,7 +101,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 resetForm();
                 loadUploads();
             } else {
-                alert('Error saving file info: ' + (result.message || 'Unknown error'));
+                if (result.message && result.message.includes('already exists')) {
+                    alert(result.message);
+                } else {
+                    alert('Error saving file info: ' + (result.message || 'Unknown error'));
+                }
             }
         } catch (error) {
             console.error('Error:', error);
@@ -109,25 +126,41 @@ document.addEventListener('DOMContentLoaded', function() {
             // Filter to show only current user's uploads
             let userUploads = uploads.filter(upload => upload.user_id == currentUserId);
             
-            // Apply search and type filters
+            // Apply search and filters
             if (applyFilters) {
-                const searchTerm = document.getElementById('search-files').value.toLowerCase();
-                const typeFilter = document.getElementById('filter-type').value;
+                const searchElement = document.getElementById('search-files');
+                const typeElement = document.getElementById('filter-type');
+                const statusElement = document.getElementById('filter-status');
+                
+                const searchTerm = searchElement ? searchElement.value.toLowerCase() : '';
+                const typeFilter = typeElement ? typeElement.value : 'all';
+                const statusFilter = statusElement ? statusElement.value : 'all';
                 
                 if (searchTerm) {
                     userUploads = userUploads.filter(upload => 
                         (upload.title && upload.title.toLowerCase().includes(searchTerm)) ||
-                        (upload.filename && upload.filename.toLowerCase().includes(searchTerm))
+                        (upload.filename && upload.filename.toLowerCase().includes(searchTerm)) ||
+                        (upload.description && upload.description.toLowerCase().includes(searchTerm))
                     );
                 }
                 
                 if (typeFilter !== 'all') {
                     userUploads = userUploads.filter(upload => upload.upload_type === typeFilter);
                 }
+                
+                if (statusFilter !== 'all') {
+                    if (statusFilter === 'public') {
+                        userUploads = userUploads.filter(upload => upload.is_public);
+                    } else if (statusFilter === 'private') {
+                        userUploads = userUploads.filter(upload => !upload.is_public);
+                    }
+                }
             }
             
             if (userUploads.length === 0) {
-                uploadsList.innerHTML = '<p class="no-uploads">No files uploaded yet.</p>';
+                uploadsList.innerHTML = applyFilters ? 
+                    '<p class="no-uploads">No files found matching the criteria.</p>' : 
+                    '<p class="no-uploads">No files uploaded yet.</p>';
                 return;
             }
             
@@ -300,7 +333,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return types[type] || type;
     }
 
-    async function loadTasks() {
+    async function loadTasks(applyFilters = false) {
         try {
             const [tasks, users, currentUserId] = await Promise.all([
                 taskCrud.readAll(),
@@ -309,13 +342,40 @@ document.addEventListener('DOMContentLoaded', function() {
             ]);
             
             // Show tasks assigned to this foreman
-            const foremanTasks = tasks.filter(task => task.foreman_id == currentUserId);
+            let foremanTasks = tasks.filter(task => task.foreman_id == currentUserId);
             
             // Add staff names to tasks
             foremanTasks.forEach(task => {
                 const staff = users.find(user => user.id == task.worker_id);
                 task.staff_name = staff ? staff.name : 'Unknown Staff';
             });
+            
+            // Apply search and filters
+            if (applyFilters) {
+                const searchElement = document.getElementById('search-tasks');
+                const priorityElement = document.getElementById('filter-priority');
+                const statusElement = document.getElementById('filter-status');
+                
+                const searchTerm = searchElement ? searchElement.value.toLowerCase() : '';
+                const priorityFilter = priorityElement ? priorityElement.value : 'all';
+                const statusFilter = statusElement ? statusElement.value : 'all';
+                
+                if (searchTerm) {
+                    foremanTasks = foremanTasks.filter(task => 
+                        (task.title && task.title.toLowerCase().includes(searchTerm)) ||
+                        (task.description && task.description.toLowerCase().includes(searchTerm)) ||
+                        (task.staff_name && task.staff_name.toLowerCase().includes(searchTerm))
+                    );
+                }
+                
+                if (priorityFilter !== 'all') {
+                    foremanTasks = foremanTasks.filter(task => task.priority === priorityFilter);
+                }
+                
+                if (statusFilter !== 'all') {
+                    foremanTasks = foremanTasks.filter(task => task.status === statusFilter);
+                }
+            }
             
             if (foremanTasks.length === 0) {
                 tasksList.innerHTML = '<p class="no-tasks">No tasks from staff.</p>';
@@ -610,7 +670,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('camera-upload-form').reset();
                 loadUploads();
             } else {
-                alert('Error saving photo info: ' + (result.message || 'Unknown error'));
+                if (result.message && result.message.includes('already exists')) {
+                    alert(result.message);
+                } else {
+                    alert('Error saving photo info: ' + (result.message || 'Unknown error'));
+                }
             }
             
         } catch (error) {

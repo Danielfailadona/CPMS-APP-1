@@ -59,6 +59,15 @@ class CrudController extends Controller
     public function store(Request $request, $table)
     {
         try {
+            // Check for duplicates based on table type
+            $duplicateCheck = $this->checkDuplicates($table, $request->all());
+            if ($duplicateCheck) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $duplicateCheck
+                ], 409);
+            }
+            
             // Try to use model validation if model exists
             $modelClass = 'App\\Models\\' . ucfirst($table === 'products' ? 'Product' : $table);
             
@@ -125,6 +134,15 @@ class CrudController extends Controller
     public function update(Request $request, $table, $id)
     {
         try {
+            // Check for duplicates (excluding current record)
+            $duplicateCheck = $this->checkDuplicates($table, $request->all(), $id);
+            if ($duplicateCheck) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $duplicateCheck
+                ], 409);
+            }
+            
             // Try to use model validation if model exists
             $modelClass = 'App\\Models\\' . ucfirst($table === 'products' ? 'Product' : $table);
             
@@ -235,5 +253,56 @@ class CrudController extends Controller
                 'message' => 'Error getting table columns: ' . $e->getMessage()
             ], 500);
         }
+    }
+    
+    // Check for duplicate records
+    private function checkDuplicates($table, $data, $excludeId = null)
+    {
+        switch ($table) {
+            case 'users':
+                if (isset($data['email'])) {
+                    $query = DB::table('users')->where('email', $data['email']);
+                    if ($excludeId) {
+                        $query->where('id', '!=', $excludeId);
+                    }
+                    if ($query->exists()) {
+                        return 'User with this email already exists';
+                    }
+                }
+                break;
+                
+            case 'uploads':
+                if (isset($data['filename']) && isset($data['user_id'])) {
+                    $query = DB::table('uploads')
+                        ->where('filename', $data['filename'])
+                        ->where('user_id', $data['user_id']);
+                    if ($excludeId) {
+                        $query->where('id', '!=', $excludeId);
+                    }
+                    if ($query->exists()) {
+                        return 'File with this name already exists for this user';
+                    }
+                }
+                break;
+                
+            case 'tasks':
+                if (isset($data['title']) && isset($data['worker_id']) && isset($data['foreman_id'])) {
+                    $query = DB::table('tasks')
+                        ->where('title', $data['title'])
+                        ->where('worker_id', $data['worker_id'])
+                        ->where('foreman_id', $data['foreman_id'])
+                        ->where('status', '!=', 'completed')
+                        ->where('status', '!=', 'cancelled');
+                    if ($excludeId) {
+                        $query->where('id', '!=', $excludeId);
+                    }
+                    if ($query->exists()) {
+                        return 'Task with this title already exists between this worker and foreman';
+                    }
+                }
+                break;
+        }
+        
+        return null;
     }
 }

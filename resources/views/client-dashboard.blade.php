@@ -101,6 +101,9 @@
                         <option value="inspection">Inspection</option>
                         <option value="other">Other</option>
                     </select>
+                    <select id="filter-user" style="padding: 8px; margin-right: 10px;">
+                        <option value="all">All Users</option>
+                    </select>
                     <button type="button" id="apply-filters" class="action-btn">Apply Filters</button>
                 </div>
                 <div id="uploads-list" class="uploads-list"></div>
