@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const taskCrud = new CrudHelper('tasks');
     const uploadCrud = new CrudHelper('uploads');
     const userCrud = new CrudHelper('users');
+    const weeklyReportCrud = new CrudHelper('weekly_reports');
+    const projectCrud = new CrudHelper('projects');
     
     const form = document.getElementById('uploadForm');
     const uploadBtn = document.getElementById('uploadBtn');
@@ -572,6 +574,9 @@ document.addEventListener('DOMContentLoaded', function() {
     window.showSection = function(section) {
         // Hide all sections
         document.getElementById('tasks-section').style.display = 'none';
+        if (document.getElementById('weekly-report-section')) {
+            document.getElementById('weekly-report-section').style.display = 'none';
+        }
         document.getElementById('files-section').style.display = 'none';
         document.getElementById('all-files-section').style.display = 'none';
         document.getElementById('upload-section').style.display = 'none';
@@ -595,6 +600,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (document.getElementById('all-files-section')) {
                 document.getElementById('all-files-section').style.display = 'block';
                 loadAllFiles();
+            }
+            event.target.classList.add('active');
+        } else if (section === 'weekly-report') {
+            if (document.getElementById('weekly-report-section')) {
+                document.getElementById('weekly-report-section').style.display = 'block';
+                loadWeeklyReports();
             }
             event.target.classList.add('active');
         } else if (section === 'upload') {
@@ -843,8 +854,99 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
+    // Weekly report functionality
+    const weeklyReportForm = document.getElementById('weeklyReportForm');
+    if (weeklyReportForm) {
+        weeklyReportForm.addEventListener('submit', submitWeeklyReport);
+    }
+    
+    const loadReportsBtn = document.getElementById('loadReportsBtn');
+    if (loadReportsBtn) {
+        loadReportsBtn.addEventListener('click', loadWeeklyReports);
+    }
+    
+    const clearReportBtn = document.getElementById('clearReportBtn');
+    if (clearReportBtn) {
+        clearReportBtn.addEventListener('click', function() {
+            document.getElementById('weeklyReportForm').reset();
+        });
+    }
+    
     // Load data on page load
     loadTasks();
+    
+    async function submitWeeklyReport(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        const submitBtn = document.getElementById('submitReportBtn');
+        
+        if (submitBtn) submitBtn.disabled = true;
+        
+        try {
+            const reportData = {
+                user_id: await getCurrentUserId(),
+                project_id: 1,
+                week_ending: formData.get('week_ending'),
+                progress_summary: formData.get('progress_summary'),
+                challenges: formData.get('challenges'),
+                next_week_plan: formData.get('next_week_plan'),
+                status: 'submitted'
+            };
+            
+            const result = await weeklyReportCrud.create(reportData);
+            
+            if (result.success) {
+                alert('Weekly report submitted successfully!');
+                e.target.reset();
+                loadWeeklyReports();
+            } else {
+                alert('Error: ' + (result.message || 'Unknown error'));
+            }
+        } catch (error) {
+            alert('Error submitting report');
+        } finally {
+            if (submitBtn) submitBtn.disabled = false;
+        }
+    }
+    
+    async function loadWeeklyReports() {
+        try {
+            const reports = await weeklyReportCrud.readAll();
+            const currentUserId = await getCurrentUserId();
+            
+            const userReports = reports.filter(report => report.user_id == currentUserId);
+            
+            const reportsList = document.getElementById('reports-list');
+            if (!reportsList) return;
+            
+            if (userReports.length === 0) {
+                reportsList.innerHTML = '<p class="no-data">No weekly reports submitted yet.</p>';
+                return;
+            }
+            
+            const reportsHTML = userReports.map(report => `
+                <div class="report-item" data-id="${report.id}">
+                    <div class="report-header">
+                        <h4>Week Ending: ${new Date(report.week_ending).toLocaleDateString()}</h4>
+                        <span class="report-status status-${report.status}">${report.status.toUpperCase()}</span>
+                    </div>
+                    <div class="report-content">
+                        <p><strong>Progress Summary:</strong> ${report.progress_summary}</p>
+                        ${report.challenges ? `<p><strong>Challenges:</strong> ${report.challenges}</p>` : ''}
+                        ${report.next_week_plan ? `<p><strong>Next Week Plan:</strong> ${report.next_week_plan}</p>` : ''}
+                    </div>
+                    <div class="report-date">
+                        <small>Submitted: ${new Date(report.created_at).toLocaleDateString()}</small>
+                    </div>
+                </div>
+            `).join('');
+            
+            reportsList.innerHTML = reportsHTML;
+        } catch (error) {
+            console.error('Error loading reports:', error);
+        }
+    }
 });
 
 // Logout function

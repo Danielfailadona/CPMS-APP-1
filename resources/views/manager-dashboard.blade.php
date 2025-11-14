@@ -14,7 +14,7 @@
         <div class="sidebar">
             <div class="profile">
                 <div class="profile-pic">
-                    <img src="{{ asset('images/test.jpg') }}" alt="Profile">
+                    <img src="{{ asset('images/aw.jpg') }}" alt="Profile">
                 </div>
                 <h3>MANAGER DASHBOARD</h3>
             </div>

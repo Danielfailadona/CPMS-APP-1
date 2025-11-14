@@ -15,13 +15,14 @@
         <div class="sidebar">
             <div class="profile">
                 <div class="profile-pic">
-                    <img src="{{ asset('images/test.jpg') }}" alt="Profile">
+                    <img src="{{ asset('images/aw.jpg') }}" alt="Profile">
                 </div>
                 <h3>FOREMAN DASHBOARD</h3>
             </div>
 
             <ul class="menu">
                 <li><a href="#" onclick="showSection('tasks')" class="btn active">Staff Tasks</a></li>
+                <li><a href="#" onclick="showSection('weekly-report')" class="btn">Weekly Report</a></li>
                 <li><a href="#" onclick="showSection('files')" class="btn">My Files</a></li>
                 <li><a href="#" onclick="showSection('all-files')" class="btn">View All Files</a></li>
                 <li><a href="#" onclick="showSection('upload')" class="btn">Upload File</a></li>
@@ -32,6 +33,52 @@
 
         <!-- Main Content -->
         <div class="main-content">
+
+            <!-- Weekly Report Section -->
+            <div class="section form-section" id="weekly-report-section" style="display: none;">
+                <div class="section-header">
+                    <h3>Weekly Progress Report</h3>
+                </div>
+                <form id="weeklyReportForm">
+                    @csrf
+                    <div class="form-fields">
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label for="week_ending">Week Ending:</label>
+                                <input id="week_ending" name="week_ending" type="date" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label for="progress_summary">Progress Summary:</label>
+                                <textarea id="progress_summary" name="progress_summary" class="form-textarea" required placeholder="Summarize this week's progress"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label for="challenges">Challenges Faced:</label>
+                                <textarea id="challenges" name="challenges" class="form-textarea" placeholder="Describe any challenges"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label for="next_week_plan">Next Week Plan:</label>
+                                <textarea id="next_week_plan" name="next_week_plan" class="form-textarea" placeholder="Plans for next week"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" id="submitReportBtn" class="btn-primary">Submit Report</button>
+                        <button type="button" id="clearReportBtn" class="btn-clear">Clear Form</button>
+                    </div>
+                </form>
+                
+                <div class="section-header" style="margin-top: 30px;">
+                    <h3>Previous Reports</h3>
+                    <button type="button" id="loadReportsBtn" class="action-btn">Refresh</button>
+                </div>
+                <div id="reports-list"></div>
+            </div>
 
             <!-- Worker Tasks Section -->
             <div class="section tasks-section" id="tasks-section">

@@ -426,3 +426,9 @@ body{
     gap: 0.3rem;
     flex-wrap: wrap;
 }
+@media (max-width: 768px) {
+    .login-box {
+        flex-direction: column;
+        width: 90%;
+    }
+}

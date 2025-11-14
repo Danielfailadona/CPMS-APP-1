@@ -12,7 +12,7 @@
         <div class="login-box">
             <div class="left" id="left-panel">
                 <div class="logo">
-                    <img src="{{ asset('images/test.jpg') }}" alt="CPMS Logo">
+                    <img src="{{ asset('images/aw.jpg') }}" alt="CPMS Logo">
                 </div>
                 <h2>Sign In</h2>
                 
@@ -57,7 +57,7 @@
             
             leftPanel.innerHTML = `
                 <div class="logo">
-                    <img src="{{ asset('images/test.jpg') }}" alt="CPMS Logo">
+                    <img src="{{ asset('images/aw.jpg') }}" alt="CPMS Logo">
                 </div>
                 <h2>Welcome Back!</h2>
                 <p style="margin-bottom: 30px; color: #666; text-align: center;">Already have an account?<br>Sign in to access your construction projects.</p>
@@ -77,6 +77,7 @@
                         <option value="staff">Staff</option>
                         <option value="foreman">Foreman</option>
                         <option value="manager">Manager</option>
+                        <option value="finance">Finance Executive</option>
                         <option value="ceo">CEO</option>
                     </select>
                     <div class="field">
@@ -125,7 +126,7 @@
             
             leftPanel.innerHTML = `
                 <div class="logo">
-                    <img src="{{ asset('images/test.jpg') }}" alt="CPMS Logo">
+                    <img src="{{ asset('images/aw.jpg') }}" alt="CPMS Logo">
                 </div>
                 <h2>Sign In</h2>
                 <div id="message" class="message"></div>
@@ -247,7 +248,8 @@
                 'foreman': '/foreman-dashboard',
                 'ceo': '/ceo-dashboard',
                 'manager': '/manager-dashboard',
-                'staff': '/worker-dashboard'
+                'staff': '/worker-dashboard',
+                'finance': '/finance-dashboard'
             };
             
             return dashboardRoutes[userType] || '/client-dashboard';

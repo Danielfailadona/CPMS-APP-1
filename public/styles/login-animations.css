@@ -89,9 +89,9 @@
     transition: all 0.2s ease;
 }
 
-.toggle-btn:hover {
+/* .toggle-btn:hover {
     transform: scale(1.1);
-}
+} */
 
 /* Keyframe Animations */
 @keyframes fadeInUp {

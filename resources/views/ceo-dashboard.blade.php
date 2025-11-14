@@ -14,21 +14,54 @@
         <div class="sidebar">
             <div class="profile">
                 <div class="profile-pic">
-                    <img src="{{ asset('images/test.jpg') }}" alt="Profile">
+                    <img src="{{ asset('images/aw.jpg') }}" alt="Profile">
                 </div>
                 <h3>CEO DASHBOARD</h3>
             </div>
 
             <ul class="menu">
-                <li><a href="#" onclick="showSection('files')" class="active">My Files</a></li>
-                <li><a href="#" onclick="showSection('upload')">Upload File</a></li>
-                <li><a href="#" onclick="showSection('camera')">📷 Take Photo</a></li>
-                <li><a href="#" onclick="logout()">Logout</a></li>
+                <li><a href="#" onclick="showSection('overview')" class="btn active">Project Overview</a></li>
+                <li><a href="#" onclick="showSection('reports')" class="btn">Consolidated Reports</a></li>
+                <li><a href="#" onclick="showSection('files')" class="btn">My Files</a></li>
+                <li><a href="#" onclick="showSection('upload')" class="btn">Upload File</a></li>
+                <li><a href="#" onclick="logout()" class="btn">Logout</a></li>
             </ul>
         </div>
 
         <!-- Main Content -->
         <div class="main-content">
+
+            <!-- Project Overview Section -->
+            <div class="section" id="overview-section">
+                <div class="section-header">
+                    <h3>Project Overview Dashboard</h3>
+                    <button type="button" id="refreshOverviewBtn" class="action-btn">Refresh</button>
+                </div>
+                <div id="project-stats" class="project-stats">
+                    <div class="stat-card">
+                        <h4>Total Projects</h4>
+                        <span class="stat-number" id="total-projects">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Active Projects</h4>
+                        <span class="stat-number" id="active-projects">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Overall Progress</h4>
+                        <span class="stat-number" id="overall-progress">0%</span>
+                    </div>
+                </div>
+                <div id="projects-list" class="projects-list"></div>
+            </div>
+
+            <!-- Consolidated Reports Section -->
+            <div class="section" id="reports-section" style="display: none;">
+                <div class="section-header">
+                    <h3>Consolidated Reports</h3>
+                    <button type="button" id="generateConsolidatedBtn" class="action-btn">Generate Report</button>
+                </div>
+                <div id="consolidated-reports" class="consolidated-reports"></div>
+            </div>
 
             <!-- Uploads List Section -->
             <div class="section uploads-section" id="files-section">
@@ -177,7 +210,8 @@
     </div>
     
     <script src="{{ asset('js/crudHelper.js') }}"></script>
-    <script src="{{ asset('js/foreman.js') }}"></script>
+    <script src="{{ asset('js/popup.js') }}"></script>
+    <script src="{{ asset('js/ceo.js') }}"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const buttons = document.querySelectorAll('.btn');
