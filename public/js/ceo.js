@@ -15,15 +15,38 @@ document.addEventListener('DOMContentLoaded', function() {
         refreshOverviewBtn.addEventListener('click', loadProjectOverview);
     }
     
-    const generateConsolidatedBtn = document.getElementById('generateConsolidatedBtn');
-    if (generateConsolidatedBtn) {
-        generateConsolidatedBtn.addEventListener('click', generateConsolidatedReport);
-    }
+
     
     const uploadForm = document.getElementById('uploadForm');
     if (uploadForm) {
         uploadForm.addEventListener('submit', handleUpload);
     }
+    
+    // Add event listeners for file section
+    const loadUploadsBtn = document.getElementById('loadUploadsBtn');
+    if (loadUploadsBtn) {
+        loadUploadsBtn.addEventListener('click', () => loadUploads());
+    }
+    
+    const applyFiltersBtn = document.getElementById('apply-filters');
+    if (applyFiltersBtn) {
+        applyFiltersBtn.addEventListener('click', () => loadUploads(true));
+    }
+    
+    const searchFiles = document.getElementById('search-files');
+    if (searchFiles) {
+        searchFiles.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') loadUploads(true);
+        });
+    }
+    
+    // Close modal when clicking outside
+    document.addEventListener('click', function(e) {
+        const modal = document.getElementById('file-viewer-modal');
+        if (modal && e.target === modal) {
+            closeFileViewer();
+        }
+    });
 });
 
 async function loadProjectOverview() {
@@ -67,52 +90,20 @@ async function createSampleProject() {
 }
 
 function updateProjectStats() {
-    const totalProjects = projects.length;
-    const activeProjects = projects.filter(p => p.status === 'active').length;
-    
-    const totalProgress = projects.reduce((sum, p) => sum + parseFloat(p.completion_percentage || 0), 0);
-    const overallProgress = totalProjects > 0 ? (totalProgress / totalProjects).toFixed(1) : 0;
-    
     const totalElement = document.getElementById('total-projects');
     const activeElement = document.getElementById('active-projects');
-    const progressElement = document.getElementById('overall-progress');
+    const reportsElement = document.getElementById('total-reports');
     
-    if (totalElement) totalElement.textContent = totalProjects;
-    if (activeElement) activeElement.textContent = activeProjects;
-    if (progressElement) progressElement.textContent = overallProgress + '%';
+    if (totalElement) totalElement.textContent = 0;
+    if (activeElement) activeElement.textContent = 0;
+    if (reportsElement) reportsElement.textContent = 0;
 }
 
 function displayProjectsList() {
     const projectsList = document.getElementById('projects-list');
     if (!projectsList) return;
     
-    if (projects.length === 0) {
-        projectsList.innerHTML = '<p class="no-data">No projects found.</p>';
-        return;
-    }
-    
-    const projectsHTML = projects.map(project => `
-        <div class="project-item" data-id="${project.id}">
-            <div class="project-header">
-                <h4>${project.name}</h4>
-                <span class="project-status status-${project.status}">${project.status.toUpperCase()}</span>
-            </div>
-            <div class="project-details">
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: ${project.completion_percentage || 0}%; background: rgb(244, 123, 32);"></div>
-                    <span class="progress-text">${project.completion_percentage || 0}% Complete</span>
-                </div>
-                <p><strong>Phases:</strong> ${project.completed_phases || 0} / ${project.total_phases || 1}</p>
-                <p><strong>Start Date:</strong> ${new Date(project.start_date).toLocaleDateString()}</p>
-                ${project.description ? `<p><strong>Description:</strong> ${project.description}</p>` : ''}
-            </div>
-            <div class="project-actions">
-                <button class="btn-primary" onclick="updateProjectProgress(${project.id})">Update Progress</button>
-            </div>
-        </div>
-    `).join('');
-    
-    projectsList.innerHTML = projectsHTML;
+    projectsList.innerHTML = '';
 }
 
 window.updateProjectProgress = async function(projectId) {
@@ -129,10 +120,8 @@ window.updateProjectProgress = async function(projectId) {
     }
     
     try {
-        const completion = (phases / project.total_phases) * 100;
         const updateData = {
-            completed_phases: phases,
-            completion_percentage: completion.toFixed(2)
+            completed_phases: phases
         };
         
         const result = await projectCrud.update(projectId, updateData);
@@ -147,69 +136,7 @@ window.updateProjectProgress = async function(projectId) {
     }
 };
 
-async function generateConsolidatedReport() {
-    const reportsDiv = document.getElementById('consolidated-reports');
-    if (!reportsDiv) return;
-    
-    try {
-        const totalUploads = uploads.length;
-        const totalReports = weeklyReports.length;
-        const recentUploads = uploads.filter(u => {
-            const uploadDate = new Date(u.created_at);
-            const weekAgo = new Date();
-            weekAgo.setDate(weekAgo.getDate() - 7);
-            return uploadDate >= weekAgo;
-        }).length;
-        
-        const reportHTML = `
-            <div class="consolidated-report">
-                <h4>Executive Summary Report</h4>
-                <div class="report-grid">
-                    <div class="report-section">
-                        <h5>Project Overview</h5>
-                        <div class="stats-grid">
-                            <div class="stat-item">
-                                <span class="stat-label">Total Projects</span>
-                                <span class="stat-value">${projects.length}</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Active Projects</span>
-                                <span class="stat-value">${projects.filter(p => p.status === 'active').length}</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="report-section">
-                        <h5>Activity Summary</h5>
-                        <div class="stats-grid">
-                            <div class="stat-item">
-                                <span class="stat-label">Total Files</span>
-                                <span class="stat-value">${totalUploads}</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Recent Uploads (7 days)</span>
-                                <span class="stat-value">${recentUploads}</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Weekly Reports</span>
-                                <span class="stat-value">${totalReports}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="report-footer">
-                    <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
-                </div>
-            </div>
-        `;
-        
-        reportsDiv.innerHTML = reportHTML;
-        showSuccess('Consolidated report generated successfully!');
-    } catch (error) {
-        showError('Error generating report');
-    }
-}
+
 
 async function handleUpload(e) {
     e.preventDefault();
@@ -242,8 +169,73 @@ function showSection(sectionName) {
     if (targetSection) {
         targetSection.style.display = 'block';
         
-        if (sectionName === 'overview') {
-            loadProjectOverview();
+        if (sectionName === 'files') {
+            loadUploads();
+        }
+    }
+}
+
+async function loadUploads(applyFilters = false) {
+    try {
+        let uploads = await uploadCrud.readAll();
+        uploads = uploads.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        
+        let filteredUploads = uploads;
+        
+        if (applyFilters) {
+            const searchElement = document.getElementById('search-files');
+            const typeElement = document.getElementById('filter-type');
+            
+            const searchTerm = searchElement ? searchElement.value.toLowerCase() : '';
+            const typeFilter = typeElement ? typeElement.value : 'all';
+            
+            if (searchTerm) {
+                filteredUploads = filteredUploads.filter(upload => 
+                    (upload.title && upload.title.toLowerCase().includes(searchTerm)) ||
+                    (upload.filename && upload.filename.toLowerCase().includes(searchTerm))
+                );
+            }
+            
+            if (typeFilter !== 'all') {
+                filteredUploads = filteredUploads.filter(upload => upload.upload_type === typeFilter);
+            }
+        }
+        
+        const uploadsList = document.getElementById('uploads-list');
+        if (!uploadsList) return;
+        
+        if (filteredUploads.length === 0) {
+            uploadsList.innerHTML = '<p class="no-uploads">No files found matching the criteria.</p>';
+            return;
+        }
+        
+        const uploadsHTML = filteredUploads.map(upload => `
+            <div class="upload-item" data-id="${upload.id}" style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 10px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <div class="upload-info" style="margin-bottom: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div class="upload-title" style="font-weight: bold; font-size: 16px; color: #333;">${upload.title || upload.filename}</div>
+                        <span style="font-size: 12px; color: #666;">ID: ${upload.id}</span>
+                    </div>
+                    <div class="upload-details" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <span style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">File Type: ${getUploadTypeLabel(upload.upload_type)}</span>
+                        <span style="background: #6c757d; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">File Size: ${upload.file_size}</span>
+                        <span style="background: #17a2b8; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Date Uploaded: ${new Date(upload.created_at).toLocaleDateString()}</span>
+                        <span style="background: #28a745; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">User ID: ${upload.user_id}</span>
+                    </div>
+                </div>
+                <div class="upload-actions" style="display: flex; gap: 8px;">
+                    <button class="view-btn" onclick="viewUpload(${upload.id})" style="background: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">View</button>
+                    <button class="delete-btn" onclick="deleteUpload(${upload.id})" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">Delete</button>
+                </div>
+            </div>
+        `).join('');
+        
+        uploadsList.innerHTML = uploadsHTML;
+    } catch (error) {
+        console.error('Error loading uploads:', error);
+        const uploadsList = document.getElementById('uploads-list');
+        if (uploadsList) {
+            uploadsList.innerHTML = '<p class="no-uploads">Error loading files.</p>';
         }
     }
 }
@@ -267,3 +259,130 @@ async function logout() {
 }
 
 console.log('CEO dashboard initialized');
+
+function getUploadTypeLabel(type) {
+    const types = {
+        'task': 'Task Related',
+        'image': 'Image',
+        'report': 'Report',
+        'document': 'Document',
+        'blueprint': 'Blueprint',
+        'safety': 'Safety Document',
+        'inspection': 'Inspection Report',
+        'other': 'Other'
+    };
+    return types[type] || type;
+}
+
+window.viewUpload = async function(id) {
+    const result = await uploadCrud.readOne(id);
+    if (result.success) {
+        const upload = result.data;
+        showFileViewerModal(upload);
+    }
+};
+
+function showFileViewerModal(upload) {
+    const modalHTML = `
+        <div id="file-viewer-modal" style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        ">
+            <div style="
+                background: white;
+                padding: 20px;
+                border-radius: 10px;
+                max-width: 80%;
+                max-height: 80%;
+                overflow-y: auto;
+                position: relative;
+            ">
+                <button onclick="closeFileViewer()" style="
+                    position: absolute;
+                    top: 10px;
+                    right: 15px;
+                    background: none;
+                    border: none;
+                    font-size: 24px;
+                    cursor: pointer;
+                    color: #666;
+                ">×</button>
+                
+                <h3 style="margin-top: 0; color: rgb(244, 123, 32);">${upload.title || upload.filename}</h3>
+                
+                <div style="margin-bottom: 15px;">
+                    <strong>Filename:</strong> ${upload.filename}<br>
+                    <strong>Type:</strong> ${getUploadTypeLabel(upload.upload_type)}<br>
+                    <strong>Size:</strong> ${upload.file_size}<br>
+                    <strong>User ID:</strong> ${upload.user_id}<br>
+                    <strong>Uploaded:</strong> ${new Date(upload.created_at).toLocaleString()}<br>
+                    <strong>Status:</strong> ${upload.is_public ? 'Public' : 'Private'}
+                </div>
+                
+                ${upload.description ? `
+                    <div style="margin-bottom: 15px;">
+                        <strong>Description:</strong><br>
+                        <p style="background: #f5f5f5; padding: 10px; border-radius: 5px;">${upload.description}</p>
+                    </div>
+                ` : ''}
+                
+                <div id="file-content" style="text-align: center;">
+                    ${upload.mime_type && upload.mime_type.startsWith('image/') ? `
+                        <img src="/download-file?path=${encodeURIComponent(upload.file_path)}&filename=${encodeURIComponent(upload.filename)}" 
+                             style="max-width: 100%; max-height: 400px; border-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" 
+                             alt="${upload.filename}">
+                    ` : `
+                        <div style="padding: 20px; background: #f0f0f0; border-radius: 5px; margin: 10px 0;">
+                            <p><strong>File:</strong> ${upload.filename}</p>
+                            <p>This file type cannot be previewed. Click download to view the file.</p>
+                            <button onclick="downloadFile('${upload.file_path}', '${upload.filename}')" 
+                                    style="background: rgb(244, 123, 32); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                                Download File
+                            </button>
+                        </div>
+                    `}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+window.closeFileViewer = function() {
+    const modal = document.getElementById('file-viewer-modal');
+    if (modal) {
+        modal.remove();
+    }
+};
+
+window.downloadFile = function(filePath, filename) {
+    const url = `/download-file?path=${encodeURIComponent(filePath)}&filename=${encodeURIComponent(filename)}`;
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+};
+
+window.deleteUpload = async function(id) {
+    if (confirm('Are you sure you want to delete this file?')) {
+        const result = await uploadCrud.delete(id);
+        
+        if (result.success) {
+            alert('File deleted successfully!');
+            loadUploads();
+        } else {
+            alert('Error: ' + (result.message || 'Unknown error'));
+        }
+    }
+};

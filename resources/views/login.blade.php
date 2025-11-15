@@ -43,8 +43,7 @@
             
             <div class="right" id="right-panel">
                 <h2>Construction Project<br>Management System</h2>
-                <p>Hello, Welcome!<br>
-                New to CPMS? Enter your details and start managing your construction projects.</p>
+                <p>New to CPMS? Enter your details and start managing your construction projects.</p>
                 <button class="register-btn" onclick="showRegister()">Register</button>
             </div>
         </div>
@@ -59,7 +58,6 @@
                 <div class="logo">
                     <img src="{{ asset('images/aw.jpg') }}" alt="CPMS Logo">
                 </div>
-                <h2>Welcome Back!</h2>
                 <p style="margin-bottom: 30px; color: #666; text-align: center;">Already have an account?<br>Sign in to access your construction projects.</p>
                 <button class="register-btn" onclick="showLogin()" style="background: rgb(244, 123, 32); color: white;">Login</button>
             `;
@@ -79,6 +77,7 @@
                         <option value="manager">Manager</option>
                         <option value="finance">Finance Executive</option>
                         <option value="ceo">CEO</option>
+                        <option value="constructor">Constructor</option>
                     </select>
                     <div class="field">
                         <input type="password" id="registerPassword" name="password" placeholder="Password" required>
@@ -155,8 +154,7 @@
             
             rightPanel.innerHTML = `
                 <h2>Construction Project<br>Management System</h2>
-                <p>Hello, Welcome!<br>
-                New to CPMS? Enter your details and start managing your construction projects.</p>
+                <p>New to CPMS? Enter your details and start managing your construction projects.</p>
                 <button class="register-btn" onclick="showRegister()">Register</button>
             `;
             
@@ -249,7 +247,8 @@
                 'ceo': '/ceo-dashboard',
                 'manager': '/manager-dashboard',
                 'staff': '/worker-dashboard',
-                'finance': '/finance-dashboard'
+                'finance': '/finance-dashboard',
+                'constructor': '/client-dashboard'
             };
             
             return dashboardRoutes[userType] || '/client-dashboard';

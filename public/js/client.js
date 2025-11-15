@@ -68,7 +68,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function loadComplaints() {
         try {
-            const complaints = await complaintCrud.readAll();
+            let complaints = await complaintCrud.readAll();
+            complaints = complaints.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
             const currentUserId = getCurrentUserId();
             
             const userComplaints = complaints.filter(complaint => complaint.client_id == currentUserId);
@@ -83,9 +84,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="complaint-info">
                         <div class="complaint-title">${complaint.title}</div>
                         <div class="complaint-details">
-                            <span class="complaint-priority priority-${complaint.priority}">${complaint.priority.toUpperCase()}</span>
-                            <span class="complaint-status status-${complaint.status}">${complaint.status.replace('_', ' ').toUpperCase()}</span>
-                            <span class="complaint-date">${new Date(complaint.created_at).toLocaleDateString()}</span>
+                            <span class="complaint-priority priority-${complaint.priority}">Priority: ${complaint.priority.toUpperCase()}</span>
+                            <span class="complaint-status status-${complaint.status}">Status: ${complaint.status.replace('_', ' ').toUpperCase()}</span>
+                            <span class="complaint-date">Date Issued: ${new Date(complaint.created_at).toLocaleDateString()}</span>
                         </div>
                         <div class="complaint-description">${complaint.description}</div>
                         ${complaint.worker_notes ? `<div class="staff-notes"><strong>Staff Notes:</strong> ${complaint.worker_notes}</div>` : ''}
@@ -109,6 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
     async function loadUploads(applyFilters = false) {
         try {
             let uploads = await uploadCrud.readAll();
+            uploads = uploads.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
             
             // Apply search and type filters
             if (applyFilters) {
@@ -137,9 +139,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="upload-info">
                         <div class="upload-title">${upload.title || upload.filename}</div>
                         <div class="upload-details">
-                            <span class="upload-type">${getUploadTypeLabel(upload.upload_type)}</span>
-                            <span class="upload-size">${upload.file_size}</span>
-                            <span class="upload-date">${new Date(upload.created_at).toLocaleDateString()}</span>
+                            <span class="upload-type">File Type: ${getUploadTypeLabel(upload.upload_type)}</span>
+                            <span class="upload-size">File Size: ${upload.file_size}</span>
+                            <span class="upload-date">Date Uploaded: ${new Date(upload.created_at).toLocaleDateString()}</span>
                             <span class="${upload.is_public ? 'upload-public' : 'upload-private'}">
                                 ${upload.is_public ? 'Public' : 'Private'}
                             </span>

@@ -20,10 +20,8 @@
             </div>
 
             <ul class="menu">
-                <li><a href="#" onclick="showSection('overview')" class="btn active">Project Overview</a></li>
-                <li><a href="#" onclick="showSection('reports')" class="btn">Consolidated Reports</a></li>
-                <li><a href="#" onclick="showSection('files')" class="btn">My Files</a></li>
-                <li><a href="#" onclick="showSection('upload')" class="btn">Upload File</a></li>
+                <li><a href="#" onclick="showSection('files')" class="btn active">Uploaded Files</a></li>
+                <li><a href="/profile" class="btn">Profile Settings</a></li>
                 <li><a href="#" onclick="logout()" class="btn">Logout</a></li>
             </ul>
         </div>
@@ -31,54 +29,25 @@
         <!-- Main Content -->
         <div class="main-content">
 
-            <!-- Project Overview Section -->
-            <div class="section" id="overview-section">
-                <div class="section-header">
-                    <h3>Project Overview Dashboard</h3>
-                    <button type="button" id="refreshOverviewBtn" class="action-btn">Refresh</button>
-                </div>
-                <div id="project-stats" class="project-stats">
-                    <div class="stat-card">
-                        <h4>Total Projects</h4>
-                        <span class="stat-number" id="total-projects">0</span>
-                    </div>
-                    <div class="stat-card">
-                        <h4>Active Projects</h4>
-                        <span class="stat-number" id="active-projects">0</span>
-                    </div>
-                    <div class="stat-card">
-                        <h4>Overall Progress</h4>
-                        <span class="stat-number" id="overall-progress">0%</span>
-                    </div>
-                </div>
-                <div id="projects-list" class="projects-list"></div>
-            </div>
 
-            <!-- Consolidated Reports Section -->
-            <div class="section" id="reports-section" style="display: none;">
-                <div class="section-header">
-                    <h3>Consolidated Reports</h3>
-                    <button type="button" id="generateConsolidatedBtn" class="action-btn">Generate Report</button>
-                </div>
-                <div id="consolidated-reports" class="consolidated-reports"></div>
-            </div>
 
-            <!-- Uploads List Section -->
+            <!-- Files Section -->
             <div class="section uploads-section" id="files-section">
                 <div class="section-header">
-                    <h3>My Uploads</h3>
+                    <h3>All Files</h3>
                     <button type="button" id="loadUploadsBtn" class="action-btn">Refresh Files</button>
                 </div>
                 <div class="file-filters" style="margin-bottom: 15px;">
                     <input type="text" id="search-files" placeholder="Search files by name..." style="padding: 8px; margin-right: 10px; width: 200px;">
                     <select id="filter-type" style="padding: 8px; margin-right: 10px;">
                         <option value="all">All Types</option>
-                        <option value="report">Executive Reports</option>
+                        <option value="task">Task Related</option>
                         <option value="image">Images</option>
+                        <option value="report">Reports</option>
                         <option value="document">Documents</option>
-                        <option value="contract">Contracts</option>
-                        <option value="invoice">Invoices</option>
                         <option value="blueprint">Blueprints</option>
+                        <option value="safety">Safety</option>
+                        <option value="inspection">Inspection</option>
                         <option value="other">Other</option>
                     </select>
                     <button type="button" id="apply-filters" class="action-btn">Apply Filters</button>
@@ -233,6 +202,9 @@
         const targetSection = document.getElementById(sectionName + '-section');
         if (targetSection) {
             targetSection.style.display = 'block';
+            if (sectionName === 'files') {
+                loadUploads();
+            }
         }
     }
     </script>

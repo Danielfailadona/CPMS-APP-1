@@ -46,6 +46,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/finance-dashboard', function () {
         return view('finance-dashboard');
     });
+    
+    Route::get('/profile', function () {
+        return view('profile');
+    });
 
     Route::get('/current-user', [AuthController::class, 'getCurrentUser']);
 

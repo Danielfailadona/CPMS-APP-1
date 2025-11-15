@@ -21,6 +21,7 @@
                 <li><a href="#" onclick="showSection('review')" class="btn active">Review Uploads</a></li>
                 <li><a href="#" onclick="showSection('reports')" class="btn">Generate Reports</a></li>
                 <li><a href="#" onclick="showSection('upload')" class="btn">Upload Financial Report</a></li>
+                <li><a href="/profile" class="btn">Profile Settings</a></li>
                 <li><a href="#" onclick="logout()" class="btn">Logout</a></li>
             </ul>
         </div>

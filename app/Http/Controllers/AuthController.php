@@ -26,14 +26,7 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
             
-            // Check if user is authorized to login
-            if (!$user->is_authorized) {
-                Auth::logout();
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Your account is pending authorization. Please contact administrator.'
-                ], 403);
-            }
+
             
             // Check if user is active
             if (!$user->is_active) {
@@ -64,7 +57,7 @@ class AuthController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
-            'user_type' => 'required|in:client,foreman,ceo,manager,staff,finance', // Admin excluded
+            'user_type' => 'required|in:client,foreman,ceo,manager,staff,finance,constructor', // Admin excluded
             'password' => 'required|string|min:8|confirmed'
         ]);
 
@@ -73,8 +66,7 @@ class AuthController extends Controller
             'email' => $validated['email'],
             'user_type' => $validated['user_type'],
             'password' => Hash::make($validated['password']),
-            'is_authorized' => false, // All registered accounts unauthorized by default
-            'authorization_notes' => 'Pending admin approval'
+
         ]);
 
         // Don't log them in automatically - they need authorization first

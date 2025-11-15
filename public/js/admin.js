@@ -40,9 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
             name: formData.get('name'),
             email: formData.get('email'),
             user_type: formData.get('user_type'),
-            is_authorized: formData.get('is_authorized') ? true : false,
-            is_active: formData.get('is_active') ? true : false,
-            authorization_notes: formData.get('authorization_notes')
+            is_active: formData.get('is_active') ? true : false
         };
 
         // Password validation
@@ -133,7 +131,8 @@ document.addEventListener('DOMContentLoaded', function() {
     async function loadUsers(applyFilters = false) {
         console.log('Loading users...');
         try {
-            const users = await userCrud.readAll();
+            let users = await userCrud.readAll();
+        users = users.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
             console.log('Users loaded:', users);
             
             let filteredUsers = users;
@@ -178,27 +177,31 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             const usersHTML = filteredUsers.map(user => `
-                <div class="user-item" data-id="${user.id}">
-                    <div class="user-info">
-                        <strong>${user.name}</strong> 
-                        <span class="user-email">(${user.email})</span>
-                        <span class="user-type ${user.user_type}">${user.user_type.toUpperCase()}</span>
-                        <span class="user-status ${user.is_authorized ? 'authorized' : 'pending'}">
-                            ${user.is_authorized ? '✓ Authorized' : '⏳ Pending'}
-                        </span>
-                        <span class="user-active ${user.is_active ? 'active' : 'inactive'}">
-                            ${user.is_active ? '🟢 Active' : '🔴 Inactive'}
-                        </span>
+                <div class="user-item" data-id="${user.id}" style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 10px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div class="user-info" style="margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <strong style="font-size: 16px; color: #333;">${user.name}</strong>
+                            <span style="font-size: 12px; color: #666;">ID: ${user.id}</span>
+                        </div>
+                        <div style="margin-bottom: 8px;">
+                            <span class="user-email" style="color: #666; font-size: 14px;">${user.email}</span>
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <span class="user-type" style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">${user.user_type.toUpperCase()}</span>
+                            <span style="background: ${user.is_active ? '#28a745' : '#dc3545'}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+                                ${user.is_active ? '🟢 Active' : '🔴 Inactive'}
+                            </span>
+                            <span style="font-size: 12px; color: #666; padding: 4px 8px; background: #f8f9fa; border-radius: 4px;">
+                                Created: ${new Date(user.created_at).toLocaleDateString()}
+                            </span>
+                        </div>
                     </div>
-                    <div class="user-actions">
-                        <button class="edit-btn" onclick="editUser(${user.id})">Edit</button>
-                        <button class="toggle-auth-btn ${user.is_authorized ? 'unauth' : 'auth'}" onclick="toggleAuthorization(${user.id}, ${user.is_authorized})">
-                            ${user.is_authorized ? 'Unauthorize' : 'Authorize'}
-                        </button>
-                        <button class="toggle-active-btn ${user.is_active ? 'deactivate' : 'activate'}" onclick="toggleActive(${user.id}, ${user.is_active})">
+                    <div class="user-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button class="edit-btn" onclick="editUser(${user.id})" style="background: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">Edit</button>
+                        <button class="toggle-active-btn" onclick="toggleActive(${user.id}, ${user.is_active})" style="background: ${user.is_active ? '#dc3545' : '#28a745'}; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
                             ${user.is_active ? 'Deactivate' : 'Activate'}
                         </button>
-                        <button class="delete-btn" onclick="deleteUser(${user.id})">Delete</button>
+                        <button class="delete-btn" onclick="deleteUser(${user.id})" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">Delete</button>
                     </div>
                 </div>
             `).join('');
@@ -228,9 +231,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('name').value = user.name;
             document.getElementById('email').value = user.email;
             document.getElementById('user_type').value = user.user_type;
-            document.getElementById('is_authorized').checked = user.is_authorized;
             document.getElementById('is_active').checked = user.is_active;
-            document.getElementById('authorization_notes').value = user.authorization_notes || '';
             document.getElementById('password').value = '';
             document.getElementById('password').placeholder = 'Leave blank to keep current password';
             document.getElementById('password').required = false;
@@ -249,8 +250,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (confirm(`Are you sure you want to ${action} this user?`)) {
             try {
                 const result = await userCrud.update(id, {
-                    is_authorized: !currentlyAuthorized,
-                    authorization_notes: `${action}d by admin on ${new Date().toLocaleString()}`
+                    is_active: !currentlyAuthorized
                 });
                 
                 if (result.success) {
@@ -382,7 +382,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Load uploads function
     async function loadUploads(applyFilters = false) {
-        const uploads = await uploadCrud.readAll();
+        let uploads = await uploadCrud.readAll();
+        uploads = uploads.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         
         let filteredUploads = uploads;
         
@@ -412,19 +413,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         const uploadsHTML = filteredUploads.map(upload => `
-            <div class="upload-item" data-id="${upload.id}">
-                <div class="upload-info">
-                    <div class="upload-title">${upload.title || upload.filename}</div>
-                    <div class="upload-details">
-                        <span class="upload-type">${upload.upload_type}</span>
-                        <span class="upload-size">${upload.file_size}</span>
-                        <span class="upload-date">${new Date(upload.created_at).toLocaleDateString()}</span>
-                        <span class="upload-user">User: ${upload.user_id}</span>
+            <div class="upload-item" data-id="${upload.id}" style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 10px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <div class="upload-info" style="margin-bottom: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div class="upload-title" style="font-weight: bold; font-size: 16px; color: #333;">${upload.title || upload.filename}</div>
+                        <span style="font-size: 12px; color: #666;">ID: ${upload.id}</span>
+                    </div>
+                    <div class="upload-details" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <span style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">File Type: ${upload.upload_type}</span>
+                        <span style="background: #6c757d; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">File Size: ${upload.file_size}</span>
+                        <span style="background: #17a2b8; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Date Uploaded: ${new Date(upload.created_at).toLocaleDateString()}</span>
+                        <span style="background: #28a745; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">User ID: ${upload.user_id}</span>
                     </div>
                 </div>
-                <div class="upload-actions">
-                    <button class="view-btn" onclick="viewUpload(${upload.id})">View</button>
-                    <button class="delete-btn" onclick="deleteUpload(${upload.id})">Delete</button>
+                <div class="upload-actions" style="display: flex; gap: 8px;">
+                    <button class="view-btn" onclick="viewUpload(${upload.id})" style="background: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">View</button>
+                    <button class="delete-btn" onclick="deleteUpload(${upload.id})" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">Delete</button>
                 </div>
             </div>
         `).join('');
@@ -469,27 +473,49 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            const tasksHTML = tasks.map(task => `
-                <div class="task-item" data-id="${task.id}">
-                    <div class="task-info">
-                        <div class="task-title">${task.title || 'Untitled Task'}</div>
-                        <div class="task-details">
-                            <span class="task-priority priority-${task.priority || 'medium'}">${(task.priority || 'medium').toUpperCase()}</span>
-                            <span class="task-status status-${task.status || 'pending'}">${(task.status || 'pending').replace('_', ' ').toUpperCase()}</span>
-                            <span class="task-date">${task.created_at ? new Date(task.created_at).toLocaleDateString() : 'No date'}</span>
-                            <span class="task-worker">Staff: ${task.worker_id || 'Unassigned'}</span>
-                            <span class="task-foreman">Foreman: ${task.foreman_id || 'Unassigned'}</span>
-                            ${task.due_date ? `<span class="task-due">Due: ${new Date(task.due_date).toLocaleDateString()}</span>` : ''}
+            const sortedTasks = tasks.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            const tasksHTML = sortedTasks.map(task => `
+                <div class="task-item" data-id="${task.id}" style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 10px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div class="task-info" style="margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <div class="task-title" style="font-weight: bold; font-size: 16px; color: #333;">${task.title || 'Untitled Task'}</div>
+                            <span style="font-size: 12px; color: #666;">ID: ${task.id}</span>
                         </div>
-                        <div class="task-description">${task.description || 'No description'}</div>
-                        ${task.foreman_notes ? `<div class="task-notes">Notes: ${task.foreman_notes}</div>` : ''}
+                        <div class="task-details" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;">
+                            <span style="background: ${getPriorityColor(task.priority)}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${(task.priority || 'medium').toUpperCase()}</span>
+                            <span style="background: ${getStatusColor(task.status)}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${(task.status || 'pending').replace('_', ' ').toUpperCase()}</span>
+                            <span style="background: #6c757d; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${task.created_at ? new Date(task.created_at).toLocaleDateString() : 'No date'}</span>
+                            <span style="background: #28a745; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Staff ID: ${task.worker_id || 'Unassigned'}</span>
+                            <span style="background: #17a2b8; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Foreman ID: ${task.foreman_id || 'Unassigned'}</span>
+                            ${task.due_date ? `<span style="background: #ffc107; color: #212529; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Due: ${new Date(task.due_date).toLocaleDateString()}</span>` : ''}
+                        </div>
+                        <div class="task-description" style="color: #666; font-size: 14px; margin-bottom: 8px;">${task.description || 'No description'}</div>
+                        ${task.foreman_notes ? `<div class="task-notes" style="background: #f8f9fa; padding: 8px; border-radius: 4px; font-size: 12px; color: #495057;">Notes: ${task.foreman_notes}</div>` : ''}
                     </div>
-                    <div class="task-actions">
-                        <button class="view-btn" onclick="viewTask(${task.id})">View</button>
-                        <button class="delete-btn" onclick="deleteTask(${task.id})">Delete</button>
+                    <div class="task-actions" style="display: flex; gap: 8px;">
+                        <button class="view-btn" onclick="viewTask(${task.id})" style="background: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">View</button>
+                        <button class="delete-btn" onclick="deleteTask(${task.id})" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">Delete</button>
                     </div>
                 </div>
             `).join('');
+            
+            function getPriorityColor(priority) {
+                switch(priority) {
+                    case 'high': return '#dc3545';
+                    case 'medium': return '#ffc107';
+                    case 'low': return '#28a745';
+                    default: return '#6c757d';
+                }
+            }
+            
+            function getStatusColor(status) {
+                switch(status) {
+                    case 'completed': return '#28a745';
+                    case 'in_progress': return '#17a2b8';
+                    case 'pending': return '#ffc107';
+                    default: return '#6c757d';
+                }
+            }
             
             tasksList.innerHTML = tasksHTML;
         } catch (error) {
@@ -502,7 +528,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Load complaints function
     async function loadComplaints() {
-        const complaints = await complaintCrud.readAll();
+        let complaints = await complaintCrud.readAll();
+        complaints = complaints.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         
         if (complaints.length === 0) {
             complaintsList.innerHTML = '<p class="no-complaints">No complaints found.</p>';
@@ -510,20 +537,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         const complaintsHTML = complaints.map(complaint => `
-            <div class="complaint-item" data-id="${complaint.id}">
-                <div class="complaint-info">
-                    <div class="complaint-title">${complaint.title}</div>
-                    <div class="complaint-details">
-                        <span class="complaint-priority priority-${complaint.priority}">${complaint.priority.toUpperCase()}</span>
-                        <span class="complaint-status status-${complaint.status}">${complaint.status.replace('_', ' ').toUpperCase()}</span>
-                        <span class="complaint-date">${new Date(complaint.created_at).toLocaleDateString()}</span>
-                        <span class="complaint-client">Client: ${complaint.client_id}</span>
+            <div class="complaint-item" data-id="${complaint.id}" style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 10px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <div class="complaint-info" style="margin-bottom: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div class="complaint-title" style="font-weight: bold; font-size: 16px; color: #333;">${complaint.title}</div>
+                        <span style="font-size: 12px; color: #666;">ID: ${complaint.id}</span>
                     </div>
-                    <div class="complaint-description">${complaint.description}</div>
+                    <div class="complaint-details" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;">
+                        <span style="background: ${complaint.priority === 'high' ? '#dc3545' : complaint.priority === 'medium' ? '#ffc107' : '#28a745'}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Priority: ${complaint.priority.toUpperCase()}</span>
+                        <span style="background: ${complaint.status === 'resolved' ? '#28a745' : complaint.status === 'in_progress' ? '#17a2b8' : '#ffc107'}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Status: ${complaint.status.replace('_', ' ').toUpperCase()}</span>
+                        <span style="background: #6c757d; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Date Issued: ${new Date(complaint.created_at).toLocaleDateString()}</span>
+                        <span style="background: #17a2b8; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Client ID: ${complaint.client_id}</span>
+                    </div>
+                    <div class="complaint-description" style="color: #666; font-size: 14px;">${complaint.description}</div>
                 </div>
-                <div class="complaint-actions">
-                    <button class="view-btn" onclick="viewComplaint(${complaint.id})">View</button>
-                    <button class="delete-btn" onclick="deleteComplaint(${complaint.id})">Delete</button>
+                <div class="complaint-actions" style="display: flex; gap: 8px;">
+                    <button class="view-btn" onclick="viewComplaint(${complaint.id})" style="background: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">View</button>
+                    <button class="delete-btn" onclick="deleteComplaint(${complaint.id})" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">Delete</button>
                 </div>
             </div>
         `).join('');

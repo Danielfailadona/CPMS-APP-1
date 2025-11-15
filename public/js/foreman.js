@@ -125,8 +125,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const uploads = await uploadCrud.readAll();
             const currentUserId = await getCurrentUserId();
             
-            // Filter to show only current user's uploads
-            let userUploads = uploads.filter(upload => upload.user_id == currentUserId);
+            // Filter to show only current user's uploads and sort by newest first
+            let userUploads = uploads.filter(upload => upload.user_id == currentUserId)
+                                   .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
             
             // Apply search and filters
             if (applyFilters) {
@@ -171,11 +172,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="upload-info">
                         <div class="upload-title">${upload.title || upload.filename}</div>
                         <div class="upload-details">
-                            <span class="upload-type">${getUploadTypeLabel(upload.upload_type)}</span>
-                            <span class="upload-size">${upload.file_size}</span>
-                            <span class="upload-date">${new Date(upload.created_at).toLocaleDateString()}</span>
+                            <span class="upload-type">File Type: ${getUploadTypeLabel(upload.upload_type)}</span>
+                            <span class="upload-size">File Size: ${upload.file_size}</span>
+                            <span class="upload-date">Date Uploaded: ${new Date(upload.created_at).toLocaleDateString()}</span>
                             <span class="${upload.is_public ? 'upload-public' : 'upload-private'}">
-                                ${upload.is_public ? 'Public' : 'Private'}
+                                Status: ${upload.is_public ? 'Public' : 'Private'}
                             </span>
                         </div>
                         ${upload.description ? `<div class="upload-description">${upload.description}</div>` : ''}
@@ -434,8 +435,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 getCurrentUserId()
             ]);
             
-            // Show tasks assigned to this foreman
-            let foremanTasks = tasks.filter(task => task.foreman_id == currentUserId);
+            // Show tasks assigned to this foreman and sort by newest first
+            let foremanTasks = tasks.filter(task => task.foreman_id == currentUserId)
+                                  .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
             
             // Add staff names to tasks
             foremanTasks.forEach(task => {
@@ -642,7 +644,11 @@ document.addEventListener('DOMContentLoaded', function() {
     async function startCamera() {
         try {
             cameraStream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: 'environment' } // Use back camera if available
+                video: { 
+                    facingMode: 'environment',
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                }
             });
             
             const video = document.getElementById('camera-video');
@@ -670,7 +676,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Capture current timestamp (cannot be edited)
         photoTimestamp = new Date();
         
-        // Draw video frame to canvas
+        // Draw video frame to canvas (not inverted)
         ctx.drawImage(video, 0, 0);
         
         // Convert to blob
@@ -820,11 +826,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="upload-info">
                         <div class="upload-title">${upload.title || upload.filename}</div>
                         <div class="upload-details">
-                            <span class="upload-type">${getUploadTypeLabel(upload.upload_type)}</span>
-                            <span class="upload-size">${upload.file_size}</span>
-                            <span class="upload-date">${new Date(upload.created_at).toLocaleDateString()}</span>
+                            <span class="upload-type">File Type: ${getUploadTypeLabel(upload.upload_type)}</span>
+                            <span class="upload-size">File Size: ${upload.file_size}</span>
+                            <span class="upload-date">Date Uploaded: ${new Date(upload.created_at).toLocaleDateString()}</span>
                             <span class="${upload.is_public ? 'upload-public' : 'upload-private'}">
-                                ${upload.is_public ? 'Public' : 'Private'}
+                                Status: ${upload.is_public ? 'Public' : 'Private'}
                             </span>
                             <span class="upload-user">User ID: ${upload.user_id}</span>
                             ${upload.is_camera_photo ? '<span class="camera-photo">📷 Camera Photo</span>' : ''}
@@ -915,7 +921,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const reports = await weeklyReportCrud.readAll();
             const currentUserId = await getCurrentUserId();
             
-            const userReports = reports.filter(report => report.user_id == currentUserId);
+            const userReports = reports.filter(report => report.user_id == currentUserId)
+                                      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
             
             const reportsList = document.getElementById('reports-list');
             if (!reportsList) return;

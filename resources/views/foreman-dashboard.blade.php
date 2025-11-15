@@ -27,6 +27,7 @@
                 <li><a href="#" onclick="showSection('all-files')" class="btn">View All Files</a></li>
                 <li><a href="#" onclick="showSection('upload')" class="btn">Upload File</a></li>
                 <li><a href="#" onclick="showSection('camera')" class="btn">📷 Take Photo</a></li>
+                <li><a href="/profile" class="btn">Profile Settings</a></li>
                 <li><a href="#" onclick="logout()" class="btn">Logout</a></li>
             </ul>
         </div>

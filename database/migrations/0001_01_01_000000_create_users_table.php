@@ -19,14 +19,11 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->enum('user_type', ['admin', 'client', 'foreman', 'ceo', 'manager', 'staff', 'finance'])->default('client');
+            $table->enum('user_type', ['admin', 'client', 'foreman', 'ceo', 'manager', 'staff', 'finance', 'constructor'])->default('client');
             $table->string('phone')->nullable();
             $table->text('address')->nullable();
             $table->boolean('is_active')->default(true);
-            $table->boolean('is_authorized')->default(false); // Authorization status
-            $table->text('authorization_notes')->nullable(); // Reason for authorization status
-            $table->timestamp('authorized_at')->nullable(); // When user was authorized
-            $table->foreignId('authorized_by')->nullable()->constrained('users'); // Who authorized the user
+
             $table->rememberToken();
             $table->timestamps();
         });
@@ -38,9 +35,7 @@ return new class extends Migration
             'password' => Hash::make('admin123'),
             'user_type' => 'admin',
             'is_active' => true,
-            'is_authorized' => true, // Admin is pre-authorized
-            'authorization_notes' => 'Default system administrator',
-            'authorized_at' => now(),
+
             'created_at' => now(),
             'updated_at' => now(),
         ]);

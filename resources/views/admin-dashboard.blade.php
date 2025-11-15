@@ -30,6 +30,7 @@
                 <li><a href="#" onclick="showSection('uploads')" class="btn">Files</a></li>
                 <li><a href="#" onclick="showSection('tasks')" class="btn">Tasks</a></li>
                 <li><a href="#" onclick="showSection('complaints')" class="btn">Complaints</a></li>
+                <li><a href="/profile" class="btn">Profile Settings</a></li>
                 <li><a href="#" onclick="logout()" class="btn">Logout</a></li>
             </ul>
         </div>
@@ -102,6 +103,8 @@
                                     <option value="manager">Manager</option>
                                     <option value="ceo">CEO</option>
                                     <option value="admin">Admin</option>
+                                    <option value="finance">Finance Executive</option>
+                                    <option value="constructor">Constructor</option>
                                 </select>
                             </div>
                         </div>
@@ -149,15 +152,7 @@
                             </div>
                         </div>
 
-                        <div class="form-row checkbox-group">
-                            <div class="input-group">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="is_authorized" name="is_authorized" value="1">
-                                    <span class="checkmark"></span>
-                                    Authorized to Login
-                                </label>
-                            </div>
-                        </div>
+
 
                         <div class="form-row checkbox-group">
                             <div class="input-group">
@@ -169,12 +164,7 @@
                             </div>
                         </div>
 
-                        <div class="form-row">
-                            <div class="input-group">
-                                <label for="authorization_notes">Authorization Notes:</label>
-                                <textarea id="authorization_notes" name="authorization_notes" class="form-textarea" placeholder="Notes about user authorization status"></textarea>
-                            </div>
-                        </div>
+
                     </div>
 
                     <!-- Action Buttons -->
@@ -220,6 +210,8 @@
                                     <option value="manager">Manager</option>
                                     <option value="ceo">CEO</option>
                                     <option value="admin">Admin</option>
+                                    <option value="finance">Finance Executive</option>
+                                    <option value="constructor">Constructor</option>
                                 </select>
                             </div>
                         </div>
@@ -267,15 +259,7 @@
                             </div>
                         </div>
 
-                        <div class="form-row checkbox-group">
-                            <div class="input-group">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="edit_is_authorized" name="is_authorized" value="1">
-                                    <span class="checkmark"></span>
-                                    Authorized to Login
-                                </label>
-                            </div>
-                        </div>
+
 
                         <div class="form-row checkbox-group">
                             <div class="input-group">
@@ -287,12 +271,7 @@
                             </div>
                         </div>
 
-                        <div class="form-row">
-                            <div class="input-group">
-                                <label for="edit_authorization_notes">Authorization Notes:</label>
-                                <textarea id="edit_authorization_notes" name="authorization_notes" class="form-textarea" placeholder="Notes about user authorization status"></textarea>
-                            </div>
-                        </div>
+
                     </div>
 
                     <!-- Action Buttons -->
