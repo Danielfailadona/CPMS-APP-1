@@ -67,15 +67,27 @@ document.addEventListener('DOMContentLoaded', function() {
             if (currentEditingId) {
                 result = await userCrud.update(currentEditingId, data);
             } else {
-                // For new users, password is required
+                // For new users, password is required and they start unauthorized
                 if (!password) {
                     showError('Password is required for new users');
                     return;
                 }
+                data.is_authorized = false; // New users need authorization
                 result = await userCrud.create(data);
+                
+                if (result.success) {
+                    showSuccess(result.message + ' - User created and pending authorization.');
+                } else {
+                    // Handle success message separately to avoid duplicate
+                    return;
+                }
             }
 
-            if (result.success) {
+            if (result.success && !currentEditingId) {
+                // Success message already shown above for new users
+                resetForm();
+                loadUsers();
+            } else if (result.success) {
                 showSuccess(result.message);
                 resetForm();
                 loadUsers();
@@ -142,10 +154,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 const searchElement = document.getElementById('search-users');
                 const roleElement = document.getElementById('filter-role');
                 const statusElement = document.getElementById('filter-status');
+                const authElement = document.getElementById('filter-authorization');
                 
                 const searchTerm = searchElement ? searchElement.value.toLowerCase() : '';
                 const roleFilter = roleElement ? roleElement.value : 'all';
                 const statusFilter = statusElement ? statusElement.value : 'all';
+                const authFilter = authElement ? authElement.value : 'all';
                 
                 if (searchTerm) {
                     filteredUsers = filteredUsers.filter(user => 
@@ -163,9 +177,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         filteredUsers = filteredUsers.filter(user => user.is_active);
                     } else if (statusFilter === 'inactive') {
                         filteredUsers = filteredUsers.filter(user => !user.is_active);
-                    } else if (statusFilter === 'authorized') {
+                    }
+                }
+                
+                if (authFilter !== 'all') {
+                    if (authFilter === 'authorized') {
                         filteredUsers = filteredUsers.filter(user => user.is_authorized);
-                    } else if (statusFilter === 'unauthorized') {
+                    } else if (authFilter === 'unauthorized') {
                         filteredUsers = filteredUsers.filter(user => !user.is_authorized);
                     }
                 }
@@ -191,6 +209,9 @@ document.addEventListener('DOMContentLoaded', function() {
                             <span style="background: ${user.is_active ? '#28a745' : '#dc3545'}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
                                 ${user.is_active ? '🟢 Active' : '🔴 Inactive'}
                             </span>
+                            <span style="background: ${user.is_authorized ? '#28a745' : '#ffc107'}; color: ${user.is_authorized ? 'white' : '#212529'}; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+                                ${user.is_authorized ? '✅ Authorized' : '⏳ Pending'}
+                            </span>
                             <span style="font-size: 12px; color: #666; padding: 4px 8px; background: #f8f9fa; border-radius: 4px;">
                                 Created: ${new Date(user.created_at).toLocaleDateString()}
                             </span>
@@ -200,6 +221,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         <button class="edit-btn" onclick="editUser(${user.id})" style="background: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">Edit</button>
                         <button class="toggle-active-btn" onclick="toggleActive(${user.id}, ${user.is_active})" style="background: ${user.is_active ? '#dc3545' : '#28a745'}; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
                             ${user.is_active ? 'Deactivate' : 'Activate'}
+                        </button>
+                        <button class="authorize-btn" onclick="toggleAuthorization(${user.id}, ${user.is_authorized})" style="background: ${user.is_authorized ? '#ffc107' : '#28a745'}; color: ${user.is_authorized ? '#212529' : 'white'}; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                            ${user.is_authorized ? 'Unauthorize' : 'Authorize'}
                         </button>
                         <button class="delete-btn" onclick="deleteUser(${user.id})" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">Delete</button>
                     </div>
@@ -236,6 +260,10 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('password').placeholder = 'Leave blank to keep current password';
             document.getElementById('password').required = false;
             
+            // Show authorization status in form title
+            const authStatus = user.is_authorized ? 'Authorized' : 'Pending Authorization';
+            document.getElementById('form-title').textContent = `Edit User - ${authStatus}`;
+            
             currentEditingId = user.id;
             document.getElementById('user_id').value = user.id;
             
@@ -247,10 +275,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Toggle user authorization
     window.toggleAuthorization = async function(id, currentlyAuthorized) {
         const action = currentlyAuthorized ? 'unauthorize' : 'authorize';
-        if (confirm(`Are you sure you want to ${action} this user?`)) {
+        showConfirmPopup(`${action.charAt(0).toUpperCase() + action.slice(1)} User`, `Are you sure you want to ${action} this user?`, async function() {
             try {
                 const result = await userCrud.update(id, {
-                    is_active: !currentlyAuthorized
+                    is_authorized: !currentlyAuthorized
                 });
                 
                 if (result.success) {
@@ -262,7 +290,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } catch (error) {
                 showError('Error updating user authorization');
             }
-        }
+        });
     };
 
     // Toggle user active status

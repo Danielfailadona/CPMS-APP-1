@@ -61,8 +61,11 @@
                         <option value="all">All Status</option>
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
+                    </select>
+                    <select id="filter-authorization" style="padding: 8px; margin-right: 10px;">
+                        <option value="all">All Authorization</option>
                         <option value="authorized">Authorized</option>
-                        <option value="unauthorized">Unauthorized</option>
+                        <option value="unauthorized">Pending Authorization</option>
                     </select>
                     <button type="button" id="apply-user-filters" class="action-btn">Apply Filters</button>
                 </div>
