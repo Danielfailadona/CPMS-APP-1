@@ -27,9 +27,14 @@
                         <a href="#" onclick="showEditUsers()">Update</a>
                     </div>
                 </li>
-                <li><a href="#" onclick="showSection('uploads')" class="btn">Files</a></li>
-                <li><a href="#" onclick="showSection('tasks')" class="btn">Tasks</a></li>
-                <li><a href="#" onclick="showSection('complaints')" class="btn">Complaints</a></li>
+                <li class="dropdown">
+                    <a href="#" class="btn dropdown-toggle" onclick="toggleViewDropdown()">View ▼</a>
+                    <div class="dropdown-menu" id="viewDropdown">
+                        <a href="#" onclick="showSection('uploads')">Files</a>
+                        <a href="#" onclick="showSection('tasks')">Tasks</a>
+                        <a href="#" onclick="showSection('complaints')">Complaints</a>
+                    </div>
+                </li>
                 <li><a href="/profile" class="btn">Profile Settings</a></li>
                 <li><a href="#" onclick="logout()" class="btn">Logout</a></li>
             </ul>
@@ -400,6 +405,11 @@
     // Dropdown toggle function
     function toggleDropdown() {
         const dropdown = document.getElementById('userDropdown');
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+    }
+    
+    function toggleViewDropdown() {
+        const dropdown = document.getElementById('viewDropdown');
         dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
     }
     

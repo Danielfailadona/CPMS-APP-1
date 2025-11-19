@@ -32,6 +32,8 @@ async function loadUploadsForReview() {
             userCrud.readAll()
         ]);
         
+        uploads = uploads.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        
         displayUploadsForReview();
     } catch (error) {
         console.error('Error loading uploads:', error);

@@ -172,10 +172,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="upload-info">
                         <div class="upload-title">${upload.title || upload.filename}</div>
                         <div class="upload-details">
-                            <span class="upload-type">File Type: ${getUploadTypeLabel(upload.upload_type)}</span>
-                            <span class="upload-size">File Size: ${upload.file_size}</span>
-                            <span class="upload-date">Date Uploaded: ${new Date(upload.created_at).toLocaleDateString()}</span>
-                            <span class="${upload.is_public ? 'upload-public' : 'upload-private'}">
+                            <span class="upload-type" style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">File Type: ${getUploadTypeLabel(upload.upload_type)}</span>
+                            <span class="upload-size" style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">File Size: ${upload.file_size}</span>
+                            <span class="upload-date" style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Date Uploaded: ${new Date(upload.created_at).toLocaleDateString()}</span>
+                            <span class="${upload.is_public ? 'upload-public' : 'upload-private'}" style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
                                 Status: ${upload.is_public ? 'Public' : 'Private'}
                             </span>
                         </div>
@@ -482,18 +482,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="task-info">
                         <div class="task-title">${task.title}</div>
                         <div class="task-details">
-                            <span class="task-priority priority-${task.priority}">${task.priority.toUpperCase()}</span>
-                            <span class="task-status status-${task.status}">${task.status.replace('_', ' ').toUpperCase()}</span>
-                            <span class="task-date">${new Date(task.created_at).toLocaleDateString()}</span>
-                            ${task.due_date ? `<span class="task-due">Due: ${new Date(task.due_date).toLocaleDateString()}</span>` : ''}
-                            <span class="task-staff">From: ${task.staff_name}</span>
+                            <span class="task-priority" style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${task.priority.toUpperCase()}</span>
+                            <span class="task-status" style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${task.status.replace('_', ' ').toUpperCase()}</span>
+                            <span class="task-date" style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${new Date(task.created_at).toLocaleDateString()}</span>
+                            ${task.due_date ? `<span class="task-due" style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Due: ${new Date(task.due_date).toLocaleDateString()}</span>` : ''}
+                            <span class="task-staff" style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">From: ${task.staff_name}</span>
                         </div>
                         <div class="task-description">${task.description}</div>
                         ${task.foreman_notes ? `<div class="foreman-notes"><strong>My Notes:</strong> ${task.foreman_notes}</div>` : ''}
                     </div>
                     <div class="task-actions">
-                        <button class="action-btn" onclick="updateTaskStatus(${task.id}, 'in_progress')">Start Task</button>
-                        <button class="resolve-btn" onclick="completeTask(${task.id})">Complete</button>
+                        <button class="action-btn" onclick="updateTaskStatus(${task.id}, 'in_progress')" style="background: rgb(244, 123, 32); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">Start Task</button>
+                        <button class="resolve-btn" onclick="completeTask(${task.id})" style="background: rgb(244, 123, 32); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">Complete</button>
                         <button class="notes-btn" onclick="addForemanNotes(${task.id})">Add Notes</button>
                     </div>
                 </div>
@@ -798,6 +798,7 @@ document.addEventListener('DOMContentLoaded', function() {
     async function loadAllFiles(applyFilters = false) {
         try {
             let uploads = await uploadCrud.readAll();
+            uploads = uploads.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
             
             // Apply search and type filters
             if (applyFilters) {
@@ -826,15 +827,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="upload-info">
                         <div class="upload-title">${upload.title || upload.filename}</div>
                         <div class="upload-details">
-                            <span class="upload-type">File Type: ${getUploadTypeLabel(upload.upload_type)}</span>
-                            <span class="upload-size">File Size: ${upload.file_size}</span>
-                            <span class="upload-date">Date Uploaded: ${new Date(upload.created_at).toLocaleDateString()}</span>
-                            <span class="${upload.is_public ? 'upload-public' : 'upload-private'}">
+                            <span class="upload-type" style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">File Type: ${getUploadTypeLabel(upload.upload_type)}</span>
+                            <span class="upload-size" style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">File Size: ${upload.file_size}</span>
+                            <span class="upload-date" style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Date Uploaded: ${new Date(upload.created_at).toLocaleDateString()}</span>
+                            <span class="${upload.is_public ? 'upload-public' : 'upload-private'}" style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
                                 Status: ${upload.is_public ? 'Public' : 'Private'}
                             </span>
-                            <span class="upload-user">User ID: ${upload.user_id}</span>
-                            ${upload.is_camera_photo ? '<span class="camera-photo">📷 Camera Photo</span>' : ''}
-                            ${upload.photo_taken_at ? `<span class="photo-timestamp">Taken: ${new Date(upload.photo_taken_at).toLocaleString()}</span>` : ''}
+                            <span class="upload-user" style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">User ID: ${upload.user_id}</span>
+                            ${upload.is_camera_photo ? '<span class="camera-photo" style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">📷 Camera Photo</span>' : ''}
+                            ${upload.photo_taken_at ? `<span class="photo-timestamp" style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Taken: ${new Date(upload.photo_taken_at).toLocaleString()}</span>` : ''}
                         </div>
                         ${upload.description ? `<div class="upload-description">${upload.description}</div>` : ''}
                     </div>
@@ -936,7 +937,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="report-item" data-id="${report.id}">
                     <div class="report-header">
                         <h4>Week Ending: ${new Date(report.week_ending).toLocaleDateString()}</h4>
-                        <span class="report-status status-${report.status}">${report.status.toUpperCase()}</span>
+                        <span class="report-status" style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${report.status.toUpperCase()}</span>
                     </div>
                     <div class="report-content">
                         <p><strong>Progress Summary:</strong> ${report.progress_summary}</p>

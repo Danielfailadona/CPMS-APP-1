@@ -208,12 +208,12 @@ body {
 }
 
 .action-btn {
-  background: #28a745;
+  background: rgb(244, 123, 32);
   color: white;
 }
 
 .action-btn:hover {
-  background: #218838;
+  background: rgb(200, 100, 25);
 }
 
 /* List Styles */
@@ -334,7 +334,7 @@ body {
 }
 
 .download-btn {
-  background: #28a745;
+  background: rgb(244, 123, 32);
   color: white;
 }
 
@@ -505,6 +505,11 @@ body {
   display: block;
   height: 18px;
   width: 18px;
+}
+
+/* Dropdown Styles */
+.dropdown-menu {
+  display: none;
 }
 
 /* Responsive */

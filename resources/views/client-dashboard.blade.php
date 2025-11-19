@@ -21,9 +21,14 @@
             </div>
 
             <ul class="menu">
-                <li><a href="#" onclick="showSection('complaints')" class="btn active">My Complaints</a></li>
+                <li class="dropdown">
+                    <a href="#" class="btn active dropdown-toggle" onclick="toggleViewDropdown()">View ▼</a>
+                    <div class="dropdown-menu" id="viewDropdown">
+                        <a href="#" onclick="showSection('complaints')">My Complaints</a>
+                        <a href="#" onclick="showSection('files')">Available Files</a>
+                    </div>
+                </li>
                 <li><a href="#" onclick="showSection('submit-complaint')" class="btn">Submit Complaint</a></li>
-                <li><a href="#" onclick="showSection('files')" class="btn">Available Files</a></li>
                 <li><a href="#" onclick="logout()" class="btn">Logout</a></li>
             </ul>
         </div>
@@ -138,6 +143,11 @@
         if (targetSection) {
             targetSection.style.display = 'block';
         }
+    }
+    
+    function toggleViewDropdown() {
+        const dropdown = document.getElementById('viewDropdown');
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
     }
     </script>
 </body>

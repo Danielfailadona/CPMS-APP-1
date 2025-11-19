@@ -20,9 +20,19 @@
             </div>
 
             <ul class="menu">
-                <li><a href="#" onclick="showSection('files')" class="active">My Files</a></li>
-                <li><a href="#" onclick="showSection('upload')">Upload File</a></li>
-                <li><a href="#" onclick="showSection('camera')">📷 Take Photo</a></li>
+                <li class="dropdown">
+                    <a href="#" onclick="toggleViewDropdown()">Files ▼</a>
+                    <ul class="dropdown-menu" id="viewDropdown">
+                        <li><a href="#" onclick="showSection('files')" class="active">My Files</a></li>
+                    </ul>
+                </li>
+                <li class="dropdown">
+                    <a href="#" onclick="toggleActionsDropdown()">Actions ▼</a>
+                    <ul class="dropdown-menu" id="actionsDropdown">
+                        <li><a href="#" onclick="showSection('upload')">Upload File</a></li>
+                        <li><a href="#" onclick="showSection('camera')">📷 Take Photo</a></li>
+                    </ul>
+                </li>
                 <li><a href="#" onclick="logout()">Logout</a></li>
             </ul>
         </div>
@@ -202,6 +212,16 @@
         if (targetSection) {
             targetSection.style.display = 'block';
         }
+    }
+    
+    function toggleViewDropdown() {
+        const dropdown = document.getElementById('viewDropdown');
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+    }
+    
+    function toggleActionsDropdown() {
+        const dropdown = document.getElementById('actionsDropdown');
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
     }
     </script>
 </body>

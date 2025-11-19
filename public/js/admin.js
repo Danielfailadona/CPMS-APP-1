@@ -206,23 +206,23 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                             <span class="user-type" style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">${user.user_type.toUpperCase()}</span>
-                            <span style="background: ${user.is_active ? '#28a745' : '#dc3545'}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+                            <span style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
                                 ${user.is_active ? '🟢 Active' : '🔴 Inactive'}
                             </span>
-                            <span style="background: ${user.is_authorized ? '#28a745' : '#ffc107'}; color: ${user.is_authorized ? 'white' : '#212529'}; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+                            <span style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
                                 ${user.is_authorized ? '✅ Authorized' : '⏳ Pending'}
                             </span>
-                            <span style="font-size: 12px; color: #666; padding: 4px 8px; background: #f8f9fa; border-radius: 4px;">
+                            <span style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
                                 Created: ${new Date(user.created_at).toLocaleDateString()}
                             </span>
                         </div>
                     </div>
                     <div class="user-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
                         <button class="edit-btn" onclick="editUser(${user.id})" style="background: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">Edit</button>
-                        <button class="toggle-active-btn" onclick="toggleActive(${user.id}, ${user.is_active})" style="background: ${user.is_active ? '#dc3545' : '#28a745'}; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                        <button class="toggle-active-btn" onclick="toggleActive(${user.id}, ${user.is_active})" style="background: ${user.is_active ? '#dc3545' : 'rgb(244, 123, 32)'}; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
                             ${user.is_active ? 'Deactivate' : 'Activate'}
                         </button>
-                        <button class="authorize-btn" onclick="toggleAuthorization(${user.id}, ${user.is_authorized})" style="background: ${user.is_authorized ? '#ffc107' : '#28a745'}; color: ${user.is_authorized ? '#212529' : 'white'}; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                        <button class="authorize-btn" onclick="toggleAuthorization(${user.id}, ${user.is_authorized})" style="background: ${user.is_authorized ? '#ffc107' : 'rgb(244, 123, 32)'}; color: ${user.is_authorized ? '#212529' : 'white'}; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
                             ${user.is_authorized ? 'Unauthorize' : 'Authorize'}
                         </button>
                         <button class="delete-btn" onclick="deleteUser(${user.id})" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">Delete</button>
@@ -449,9 +449,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                     <div class="upload-details" style="display: flex; gap: 8px; flex-wrap: wrap;">
                         <span style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">File Type: ${upload.upload_type}</span>
-                        <span style="background: #6c757d; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">File Size: ${upload.file_size}</span>
-                        <span style="background: #17a2b8; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Date Uploaded: ${new Date(upload.created_at).toLocaleDateString()}</span>
-                        <span style="background: #28a745; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">User ID: ${upload.user_id}</span>
+                        <span style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">File Size: ${upload.file_size}</span>
+                        <span style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Date Uploaded: ${new Date(upload.created_at).toLocaleDateString()}</span>
+                        <span style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">User ID: ${upload.user_id}</span>
                     </div>
                 </div>
                 <div class="upload-actions" style="display: flex; gap: 8px;">
@@ -510,12 +510,12 @@ document.addEventListener('DOMContentLoaded', function() {
                             <span style="font-size: 12px; color: #666;">ID: ${task.id}</span>
                         </div>
                         <div class="task-details" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;">
-                            <span style="background: ${getPriorityColor(task.priority)}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${(task.priority || 'medium').toUpperCase()}</span>
-                            <span style="background: ${getStatusColor(task.status)}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${(task.status || 'pending').replace('_', ' ').toUpperCase()}</span>
-                            <span style="background: #6c757d; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${task.created_at ? new Date(task.created_at).toLocaleDateString() : 'No date'}</span>
-                            <span style="background: #28a745; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Staff ID: ${task.worker_id || 'Unassigned'}</span>
-                            <span style="background: #17a2b8; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Foreman ID: ${task.foreman_id || 'Unassigned'}</span>
-                            ${task.due_date ? `<span style="background: #ffc107; color: #212529; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Due: ${new Date(task.due_date).toLocaleDateString()}</span>` : ''}
+                            <span style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${(task.priority || 'medium').toUpperCase()}</span>
+                            <span style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${(task.status || 'pending').replace('_', ' ').toUpperCase()}</span>
+                            <span style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${task.created_at ? new Date(task.created_at).toLocaleDateString() : 'No date'}</span>
+                            <span style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Staff ID: ${task.worker_id || 'Unassigned'}</span>
+                            <span style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Foreman ID: ${task.foreman_id || 'Unassigned'}</span>
+                            ${task.due_date ? `<span style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Due: ${new Date(task.due_date).toLocaleDateString()}</span>` : ''}
                         </div>
                         <div class="task-description" style="color: #666; font-size: 14px; margin-bottom: 8px;">${task.description || 'No description'}</div>
                         ${task.foreman_notes ? `<div class="task-notes" style="background: #f8f9fa; padding: 8px; border-radius: 4px; font-size: 12px; color: #495057;">Notes: ${task.foreman_notes}</div>` : ''}
@@ -572,10 +572,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         <span style="font-size: 12px; color: #666;">ID: ${complaint.id}</span>
                     </div>
                     <div class="complaint-details" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;">
-                        <span style="background: ${complaint.priority === 'high' ? '#dc3545' : complaint.priority === 'medium' ? '#ffc107' : '#28a745'}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Priority: ${complaint.priority.toUpperCase()}</span>
-                        <span style="background: ${complaint.status === 'resolved' ? '#28a745' : complaint.status === 'in_progress' ? '#17a2b8' : '#ffc107'}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Status: ${complaint.status.replace('_', ' ').toUpperCase()}</span>
-                        <span style="background: #6c757d; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Date Issued: ${new Date(complaint.created_at).toLocaleDateString()}</span>
-                        <span style="background: #17a2b8; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Client ID: ${complaint.client_id}</span>
+                        <span style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Priority: ${complaint.priority.toUpperCase()}</span>
+                        <span style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Status: ${complaint.status.replace('_', ' ').toUpperCase()}</span>
+                        <span style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Date Issued: ${new Date(complaint.created_at).toLocaleDateString()}</span>
+                        <span style="background: rgb(244, 123, 32); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Client ID: ${complaint.client_id}</span>
                     </div>
                     <div class="complaint-description" style="color: #666; font-size: 14px;">${complaint.description}</div>
                 </div>

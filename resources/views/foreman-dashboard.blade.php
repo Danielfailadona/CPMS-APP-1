@@ -21,12 +21,22 @@
             </div>
 
             <ul class="menu">
-                <li><a href="#" onclick="showSection('tasks')" class="btn active">Staff Tasks</a></li>
-                <li><a href="#" onclick="showSection('weekly-report')" class="btn">Weekly Report</a></li>
-                <li><a href="#" onclick="showSection('files')" class="btn">My Files</a></li>
-                <li><a href="#" onclick="showSection('all-files')" class="btn">View All Files</a></li>
-                <li><a href="#" onclick="showSection('upload')" class="btn">Upload File</a></li>
-                <li><a href="#" onclick="showSection('camera')" class="btn">📷 Take Photo</a></li>
+                <li class="dropdown">
+                    <a href="#" class="btn dropdown-toggle" onclick="toggleFilesDropdown()">Files ▼</a>
+                    <div class="dropdown-menu" id="filesDropdown">
+                        <a href="#" onclick="showSection('files')">My Files</a>
+                        <a href="#" onclick="showSection('all-files')">View All Files</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#" class="btn active dropdown-toggle" onclick="toggleUploadDropdown()">Actions ▼</a>
+                    <div class="dropdown-menu" id="uploadDropdown">
+                        <a href="#" onclick="showSection('tasks')">Staff Tasks</a>
+                        <a href="#" onclick="showSection('weekly-report')">Weekly Report</a>
+                        <a href="#" onclick="showSection('upload')">Upload File</a>
+                        <a href="#" onclick="showSection('camera')">📷 Take Photo</a>
+                    </div>
+                </li>
                 <li><a href="/profile" class="btn">Profile Settings</a></li>
                 <li><a href="#" onclick="logout()" class="btn">Logout</a></li>
             </ul>
@@ -309,6 +319,16 @@
         if (targetSection) {
             targetSection.style.display = 'block';
         }
+    }
+    
+    function toggleUploadDropdown() {
+        const dropdown = document.getElementById('uploadDropdown');
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+    }
+    
+    function toggleFilesDropdown() {
+        const dropdown = document.getElementById('filesDropdown');
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
     }
     </script>
 </body>
