@@ -33,6 +33,7 @@
                         <a href="#" onclick="showSection('uploads')">Files</a>
                         <a href="#" onclick="showSection('tasks')">Tasks</a>
                         <a href="#" onclick="showSection('complaints')">Complaints</a>
+                        <a href="#" onclick="showSection('projects')">Projects</a>
                     </div>
                 </li>
                 <li><a href="/profile" class="btn">Profile Settings</a></li>
@@ -58,9 +59,8 @@
                         <option value="admin">Admin</option>
                         <option value="client">Client</option>
                         <option value="staff">Staff</option>
-                        <option value="foreman">Foreman</option>
+                        <option value="foreman">Constructor</option>
                         <option value="manager">Manager</option>
-                        <option value="ceo">CEO</option>
                     </select>
                     <select id="filter-status" style="padding: 8px; margin-right: 10px;">
                         <option value="all">All Status</option>
@@ -107,12 +107,9 @@
                                 <select id="user_type" name="user_type" class="form-select" required>
                                     <option value="client">Client</option>
                                     <option value="staff">Staff</option>
-                                    <option value="foreman">Foreman</option>
+                                    <option value="foreman">Constructor</option>
                                     <option value="manager">Manager</option>
-                                    <option value="ceo">CEO</option>
                                     <option value="admin">Admin</option>
-                                    <option value="finance">Finance Executive</option>
-                                    <option value="constructor">Constructor</option>
                                 </select>
                             </div>
                         </div>
@@ -214,12 +211,9 @@
                                 <select id="edit_user_type" name="user_type" class="form-select" required>
                                     <option value="client">Client</option>
                                     <option value="staff">Staff</option>
-                                    <option value="foreman">Foreman</option>
+                                    <option value="foreman">Constructor</option>
                                     <option value="manager">Manager</option>
-                                    <option value="ceo">CEO</option>
                                     <option value="admin">Admin</option>
-                                    <option value="finance">Finance Executive</option>
-                                    <option value="constructor">Constructor</option>
                                 </select>
                             </div>
                         </div>
@@ -331,11 +325,50 @@
                 </div>
                 <div id="complaints-list" class="complaints-list"></div>
             </div>
+
+            <!-- Projects Section -->
+            <div class="section projects-section" id="projects-section" style="display: none;">
+                <div class="section-header">
+                    <h3>All Projects</h3>
+                    <button type="button" id="loadAllProjectsBtn" class="action-btn">Refresh Projects</button>
+                </div>
+                <div id="all-projects-list" class="projects-list"></div>
+            </div>
+
+            <!-- Edit Project Section -->
+            <div class="section form-section" id="edit-project-section" style="display: none;">
+                <div class="section-header">
+                    <h3>Edit Project</h3>
+                </div>
+                <div id="project-details"></div>
+                <div class="form-row">
+                    <div class="input-group">
+                        <label>Assigned Users:</label>
+                        <div id="current-users" style="margin-bottom: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9;"></div>
+                        <div style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
+                            <input type="text" id="search-project-users" placeholder="Search users..." style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                            <select id="filter-project-user-type" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                                <option value="all">All Types</option>
+                                <option value="client">Client</option>
+                                <option value="foreman">Constructor</option>
+                                <option value="staff">Staff</option>
+                            </select>
+                            <button type="button" id="apply-project-filters" class="action-btn">Apply Filters</button>
+                        </div>
+                        <div id="available-users-list" style="max-height: 150px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 4px;"></div>
+                        <button type="button" id="update-project-users" class="action-btn" style="margin-top: 10px;">Update Users</button>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-clear" onclick="showSection('projects')">Back to Projects</button>
+                </div>
+            </div>
         </div>
     </div>
     
     <script src="{{ asset('js/crudHelper.js') }}"></script>
     <script src="{{ asset('js/admin.js') }}"></script>
+    <script src="{{ asset('js/admin-projects.js') }}"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const buttons = document.querySelectorAll('.btn');

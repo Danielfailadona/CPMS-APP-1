@@ -5,208 +5,121 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEO Dashboard - CPMS</title>
     <link rel="stylesheet" href="{{ asset('styles/sidebar.css') }}">
-    <link rel="stylesheet" href="{{ asset('styles/dashboard-animations.css') }}">
-    <link rel="stylesheet" href="{{ asset('styles/dashboard-animations.css') }}">
+    <link rel="stylesheet" href="{{ asset('styles/dashboard.css') }}">
+    <style>
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .project-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .project-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .project-manager {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .circular-progress {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+        }
+        .circular-progress svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+        .circular-progress circle {
+            fill: none;
+            stroke-width: 8;
+        }
+        .progress-bg {
+            stroke: #e6e6e6;
+        }
+        .progress-bar {
+            stroke: rgb(244, 123, 32);
+            stroke-linecap: round;
+            transition: stroke-dasharray 0.5s ease;
+        }
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            font-weight: bold;
+            color: rgb(244, 123, 32);
+        }
+        .project-details {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="profile">
-                <div class="profile-pic">
-                    <img src="{{ asset('images/aw.jpg') }}" alt="Profile">
-                </div>
-                <h3>CEO DASHBOARD</h3>
+    <div class="sidebar">
+        <div class="logo">
+            <img src="{{ asset('images/aw.jpg') }}" alt="CPMS Logo">
+            <h2>CPMS</h2>
+        </div>
+        
+        <div class="user-info">
+            <div class="user-avatar">
+                <span id="userInitials">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
             </div>
-
-            <ul class="menu">
-                <li><a href="#" onclick="showSection('files')" class="btn active">Uploaded Files</a></li>
-                <li><a href="/profile" class="btn">Profile Settings</a></li>
-                <li><a href="#" onclick="logout()" class="btn">Logout</a></li>
-            </ul>
+            <div class="user-details">
+                <span class="user-name">{{ Auth::user()->name }}</span>
+                <span class="user-role">CEO</span>
+            </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="main-content">
-
-
-
-            <!-- Files Section -->
-            <div class="section uploads-section" id="files-section">
-                <div class="section-header">
-                    <h3>All Files</h3>
-                    <button type="button" id="loadUploadsBtn" class="action-btn">Refresh Files</button>
-                </div>
-                <div class="file-filters" style="margin-bottom: 15px;">
-                    <input type="text" id="search-files" placeholder="Search files by name..." style="padding: 8px; margin-right: 10px; width: 200px;">
-                    <select id="filter-type" style="padding: 8px; margin-right: 10px;">
-                        <option value="all">All Types</option>
-                        <option value="task">Task Related</option>
-                        <option value="image">Images</option>
-                        <option value="report">Reports</option>
-                        <option value="document">Documents</option>
-                        <option value="blueprint">Blueprints</option>
-                        <option value="safety">Safety</option>
-                        <option value="inspection">Inspection</option>
-                        <option value="other">Other</option>
-                    </select>
-                    <button type="button" id="apply-filters" class="action-btn">Apply Filters</button>
-                </div>
-                <div id="uploads-list" class="uploads-list"></div>
+        <nav class="nav-menu">
+            <div class="nav-item">
+                <a href="#" class="nav-link active">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Projects Overview</span>
+                </a>
             </div>
+        </nav>
 
-            <!-- Upload Form Section -->
-            <div class="section form-section" id="upload-section" style="display: none;">
-                <div class="section-header">
-                    <h3>Upload New File</h3>
-                </div>
-                <form id="uploadForm" enctype="multipart/form-data">
-                    @csrf
-                    
-                    <div class="form-fields">
-                        <div class="form-row">
-                            <div class="input-group">
-                                <label for="file">Select File:</label>
-                                <input type="file" id="file" name="file" required accept="*/*">
-                            </div>
-                        </div>
+        <div class="sidebar-footer">
+            <a href="/logout" class="logout-btn">
+                <span class="logout-icon">🚪</span>
+                <span class="logout-text">Logout</span>
+            </a>
+        </div>
+    </div>
 
-                        <div class="form-row">
-                            <div class="input-group">
-                                <label for="title">File Title:</label>
-                                <input id="title" name="title" type="text" required placeholder="Enter a descriptive title">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="input-group">
-                                <label for="upload_type">File Type:</label>
-                                <select id="upload_type" name="upload_type" class="form-select" required>
-                                    <option value="report">Executive Report</option>
-                                    <option value="document">Document</option>
-                                    <option value="contract">Contract</option>
-                                    <option value="invoice">Invoice</option>
-                                    <option value="blueprint">Blueprint/Plan</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="input-group">
-                                <label for="description">Description:</label>
-                                <textarea id="description" name="description" class="form-textarea" placeholder="Describe what this file is about"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="form-row checkbox-group">
-                            <div class="input-group">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="is_public" name="is_public" value="1">
-                                    <span class="checkmark"></span>
-                                    Make file public
-                                </label>
-                                <small class="checkbox-hint">Public files can be seen by other users</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="form-actions">
-                        <button type="submit" id="uploadBtn" class="btn-primary">Upload File</button>
-                        <button type="button" id="clearFormBtn" class="btn-clear">Clear Form</button>
-                    </div>
-                </form>
+    <div class="main-content">
+        <div class="header">
+            <h1>Projects Overview</h1>
+            <div class="header-actions">
+                <span class="date">{{ date('F j, Y') }}</span>
             </div>
+        </div>
 
-            <!-- Camera Section -->
-            <div class="section form-section" id="camera-section" style="display: none;">
-                <div class="section-header">
-                    <h3>📷 Take Photo with Timestamp</h3>
-                </div>
-                <div class="camera-container">
-                    <video id="camera-video" autoplay playsinline style="width: 100%; max-width: 400px; border-radius: 8px;"></video>
-                    <canvas id="camera-canvas" style="display: none;"></canvas>
-                    
-                    <div class="camera-controls" style="margin-top: 15px;">
-                        <button type="button" id="start-camera-btn" class="btn-primary">Start Camera</button>
-                        <button type="button" id="take-photo-btn" class="btn-primary" style="display: none;">Take Photo</button>
-                        <button type="button" id="stop-camera-btn" class="btn-clear" style="display: none;">Stop Camera</button>
-                    </div>
-                    
-                    <div id="photo-preview" style="margin-top: 15px; display: none;">
-                        <h4>Photo Preview:</h4>
-                        <img id="preview-image" style="width: 100%; max-width: 400px; border-radius: 8px; border: 2px solid #007bff;">
-                        <div id="photo-timestamp" style="margin: 10px 0; font-weight: bold; color: #007bff;"></div>
-                        
-                        <form id="camera-upload-form">
-                            @csrf
-                            <div class="form-fields">
-                                <div class="form-row">
-                                    <div class="input-group">
-                                        <label for="photo_title">Photo Title:</label>
-                                        <input id="photo_title" name="title" type="text" required placeholder="Enter photo description">
-                                    </div>
-                                </div>
-                                
-                                <div class="form-row">
-                                    <div class="input-group">
-                                        <label for="photo_description">Description:</label>
-                                        <textarea id="photo_description" name="description" class="form-textarea" placeholder="Additional details about this photo"></textarea>
-                                    </div>
-                                </div>
-                                
-                                <div class="form-row checkbox-group">
-                                    <div class="input-group">
-                                        <label class="checkbox-label">
-                                            <input type="checkbox" id="photo_is_public" name="is_public" value="1">
-                                            <span class="checkmark"></span>
-                                            Make photo public
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="form-actions">
-                                <button type="submit" id="upload-photo-btn" class="btn-primary">Upload Photo</button>
-                                <button type="button" id="retake-photo-btn" class="btn-clear">Retake Photo</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+        <div class="content">
+            <div id="projectsGrid" class="projects-grid">
+                <!-- Projects will be loaded here -->
             </div>
         </div>
     </div>
-    
-    <script src="{{ asset('js/crudHelper.js') }}"></script>
-    <script src="{{ asset('js/popup.js') }}"></script>
+
     <script src="{{ asset('js/ceo.js') }}"></script>
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const buttons = document.querySelectorAll('.btn');
-        
-        buttons.forEach(button => {
-            button.addEventListener('click', function() {
-                buttons.forEach(btn => {
-                    btn.classList.remove('active');
-                });
-                this.classList.add('active');
-            });
-        });
-    });
-    
-    function showSection(sectionName) {
-        document.querySelectorAll('.section').forEach(section => {
-            section.style.display = 'none';
-        });
-        const targetSection = document.getElementById(sectionName + '-section');
-        if (targetSection) {
-            targetSection.style.display = 'block';
-            if (sectionName === 'files') {
-                loadUploads();
-            }
-        }
-    }
-    </script>
 </body>
 </html>

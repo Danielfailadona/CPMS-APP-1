@@ -128,6 +128,22 @@ Route::post('/upload-file-test', function (Illuminate\Http\Request $request) {
     return response()->json(['success' => false, 'message' => 'No file uploaded'], 400);
 })->middleware('auth');
 
+    // Project Management Routes
+    Route::prefix('api')->group(function () {
+        Route::get('/projects', [App\Http\Controllers\ProjectController::class, 'index']);
+        Route::post('/projects', [App\Http\Controllers\ProjectController::class, 'store']);
+        Route::get('/project-users', [App\Http\Controllers\ProjectController::class, 'getUsers']);
+        Route::put('/milestones/{milestone}', [App\Http\Controllers\ProjectController::class, 'updateMilestone']);
+        
+        // Admin project routes
+        Route::get('/admin/projects', [App\Http\Controllers\ProjectController::class, 'getAllProjects']);
+        Route::get('/admin/projects/{id}', [App\Http\Controllers\ProjectController::class, 'getProject']);
+        Route::put('/admin/projects/{id}/users', [App\Http\Controllers\ProjectController::class, 'updateProjectUsers']);
+        
+        // CEO project routes
+        Route::get('/projects/all', [App\Http\Controllers\ProjectController::class, 'getAllProjects']);
+    });
+
     // GENERIC CRUD ROUTES FOR ANY TABLE
     Route::prefix('crud')->group(function () {
         Route::get('/{table}', [CrudController::class, 'index']);              // GET ALL records

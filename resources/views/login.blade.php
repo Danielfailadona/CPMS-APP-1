@@ -73,11 +73,8 @@
                         <option value="">Select User Type</option>
                         <option value="client">Client</option>
                         <option value="staff">Staff</option>
-                        <option value="foreman">Foreman</option>
+                        <option value="foreman">Constructor</option>
                         <option value="manager">Manager</option>
-                        <option value="finance">Finance Executive</option>
-                        <option value="ceo">CEO</option>
-                        <option value="constructor">Constructor</option>
                     </select>
                     <div class="field">
                         <input type="password" id="registerPassword" name="password" placeholder="Password" required>
@@ -244,11 +241,9 @@
                 'admin': '/admin-dashboard',
                 'client': '/client-dashboard', 
                 'foreman': '/foreman-dashboard',
-                'ceo': '/ceo-dashboard',
                 'manager': '/manager-dashboard',
-                'staff': '/worker-dashboard',
-                'finance': '/finance-dashboard',
-                'constructor': '/client-dashboard'
+                'ceo': '/ceo-dashboard',
+                'staff': '/worker-dashboard'
             };
             
             return dashboardRoutes[userType] || '/client-dashboard';

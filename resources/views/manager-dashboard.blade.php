@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Manager Dashboard - CPMS</title>
     <link rel="stylesheet" href="{{ asset('styles/sidebar.css') }}">
     <link rel="stylesheet" href="{{ asset('styles/dashboard-animations.css') }}">
@@ -20,6 +21,13 @@
             </div>
 
             <ul class="menu">
+                <li class="dropdown">
+                    <a href="#" onclick="toggleProjectsDropdown()">Projects ▼</a>
+                    <ul class="dropdown-menu" id="projectsDropdown">
+                        <li><a href="#" onclick="showSection('projects')">My Projects</a></li>
+                        <li><a href="#" onclick="showSection('create-project')">Create Project</a></li>
+                    </ul>
+                </li>
                 <li class="dropdown">
                     <a href="#" onclick="toggleViewDropdown()">Files ▼</a>
                     <ul class="dropdown-menu" id="viewDropdown">
@@ -39,6 +47,93 @@
 
         <!-- Main Content -->
         <div class="main-content">
+
+            <!-- Projects Section -->
+            <div class="section projects-section" id="projects-section" style="display: none;">
+                <div class="section-header">
+                    <h3>My Projects</h3>
+                    <button type="button" id="loadProjectsBtn" class="action-btn">Refresh Projects</button>
+                </div>
+                <div id="projects-list" class="projects-list"></div>
+            </div>
+
+            <!-- Create Project Section -->
+            <div class="section form-section" id="create-project-section" style="display: none;">
+                <div class="section-header">
+                    <h3>Create New Project</h3>
+                </div>
+                <form id="createProjectForm">
+                    @csrf
+                    <div class="form-fields">
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label for="project_name">Project Name:</label>
+                                <input id="project_name" name="name" type="text" required placeholder="Enter project name">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label for="project_description">Description:</label>
+                                <textarea id="project_description" name="description" class="form-textarea" placeholder="Project description"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label for="start_date">Start Date:</label>
+                                <input id="start_date" name="start_date" type="date" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label for="end_date">End Date:</label>
+                                <input id="end_date" name="end_date" type="date" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label>Assign Users:</label>
+                                <div style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
+                                    <input type="text" id="search-users" placeholder="Search users..." style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                                    <select id="filter-user-type" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                                        <option value="all">All Types</option>
+                                        <option value="client">Client</option>
+                                        <option value="foreman">Constructor</option>
+                                        <option value="staff">Staff</option>
+                                    </select>
+                                    <button type="button" id="apply-user-filters" class="action-btn">Apply Filters</button>
+                                </div>
+                                <div id="users-list" style="max-height: 150px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 4px;"></div>
+                                <button type="button" id="assign-users-btn" class="action-btn" style="margin-top: 10px;">Assign Users</button>
+                                <div id="assigned-users-display" style="margin-top: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9; display: none;">
+                                    <strong>Assigned Users:</strong>
+                                    <div id="assigned-users-list" style="margin-top: 5px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label>Milestones:</label>
+                                <div style="margin-bottom: 10px;">
+                                    <label for="milestone_count">Number of Milestones:</label>
+                                    <input type="number" id="milestone_count" min="1" max="20" value="1" style="padding: 8px; margin-left: 10px; width: 80px; border: 1px solid #ccc; border-radius: 4px;">
+                                    <button type="button" id="generate-milestones" class="action-btn" style="margin-left: 10px;">Generate Milestones</button>
+                                </div>
+                                <div id="milestones-container">
+                                    <div class="milestone-item" style="border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
+                                        <input type="text" name="milestones[0][name]" placeholder="Milestone name" required style="width: 100%; margin-bottom: 5px; padding: 8px;">
+                                        <textarea name="milestones[0][description]" placeholder="Milestone description" style="width: 100%; margin-bottom: 5px; padding: 8px; height: 60px;"></textarea>
+                                        <input type="date" name="milestones[0][due_date]" style="width: 100%; padding: 8px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">Create Project</button>
+                        <button type="button" class="btn-clear" onclick="document.getElementById('createProjectForm').reset()">Clear Form</button>
+                    </div>
+                </form>
+            </div>
 
             <!-- Uploads List Section -->
             <div class="section uploads-section" id="files-section">
@@ -98,6 +193,15 @@
                                     <option value="safety">Safety Document</option>
                                     <option value="inspection">Inspection Report</option>
                                     <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label for="project_id">Associate with Project:</label>
+                                <select id="project_id" name="project_id" class="form-select">
+                                    <option value="">No Project</option>
                                 </select>
                             </div>
                         </div>
@@ -190,6 +294,7 @@
     
     <script src="{{ asset('js/crudHelper.js') }}"></script>
     <script src="{{ asset('js/foreman.js') }}"></script>
+    <script src="{{ asset('js/projects.js') }}"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const buttons = document.querySelectorAll('.btn');
@@ -221,6 +326,11 @@
     
     function toggleActionsDropdown() {
         const dropdown = document.getElementById('actionsDropdown');
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+    }
+    
+    function toggleProjectsDropdown() {
+        const dropdown = document.getElementById('projectsDropdown');
         dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
     }
     </script>

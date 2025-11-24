@@ -57,7 +57,7 @@ class AuthController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
-            'user_type' => 'required|in:client,foreman,ceo,manager,staff,finance,constructor', // Admin excluded
+            'user_type' => 'required|in:client,foreman,manager,staff,ceo', // Admin excluded (foreman displays as constructor)
             'password' => 'required|string|min:8|confirmed'
         ]);
 
